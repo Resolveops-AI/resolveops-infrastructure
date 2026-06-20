@@ -1,5 +1,15 @@
-name: "Terraform IaC Deployment"
+name: "Terraform Platform Deployment"
 
+# Triggers on pushes/PRs that modify terraform files.
+# Authentication uses branch-based OIDC — no environment gate.
+#
+# Azure Entra Federated Credential for this workflow must be configured as:
+#   Subject: repo:Resolveops-AI/resolveops-infrastructure:ref:refs/heads/main
+#
+# This means the Azure App Registration (or Managed Identity) that holds
+# AZURE_CLIENT_ID must have a federated credential matching the subject above.
+# Do NOT use environment-scoped subjects (e.g. repo:...:environment:dev) for
+# this platform workflow — branch-based OIDC is the correct approach.
 on:
   push:
     branches:
@@ -16,13 +26,15 @@ permissions:
   contents: read
 
 jobs:
-  terraform:
-    name: "Terraform Dev Deployment"
+  terraform-platform:
+    name: "Terraform Platform"
     runs-on: ubuntu-latest
-    environment: dev
+    # No `environment:` key here — branch-based OIDC is used instead.
+    # Adding environment: dev would require an environment-scoped federated
+    # credential on the Azure side, which is incorrect for the platform.
     defaults:
       run:
-        working-directory: terraform/environments/dev
+        working-directory: terraform/platform
 
     steps:
       - name: Checkout Repository
@@ -55,7 +67,7 @@ jobs:
         with:
           directory: terraform/
           framework: terraform
-          soft_fail: false # Hard failure required by policy
+          soft_fail: false
 
       - name: Terraform Plan
         id: plan
@@ -64,8 +76,8 @@ jobs:
       - name: Upload Terraform Plan
         uses: actions/upload-artifact@v4
         with:
-          name: tfplan-dev
-          path: terraform/environments/dev/tfplan
+          name: tfplan-platform
+          path: terraform/platform/tfplan
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
