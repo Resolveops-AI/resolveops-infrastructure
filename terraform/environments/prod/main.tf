@@ -28,7 +28,7 @@ module "acr" {
   name                = var.acr_name
   resource_group_name = module.resource_group.name
   location            = var.location
-  sku                 = "Basic" # Keep simple for dev
+  sku                 = "Premium" # Use Premium for Prod
   tags                = local.tags
 }
 
@@ -48,10 +48,10 @@ module "aks" {
   dns_prefix                 = "${var.aks_cluster_name}-dns"
   vnet_subnet_id             = module.networking.subnet_ids["aks"]
   log_analytics_workspace_id = module.log_analytics.id
-  system_node_vm_size        = "Standard_B2s" # Small size for dev
+  system_node_vm_size        = "Standard_D4s_v3" # Larger size for prod
   system_node_auto_scaling   = true
-  system_node_min_count      = 1
-  system_node_max_count      = 3
+  system_node_min_count      = 2
+  system_node_max_count      = 5
   tags                       = local.tags
 
   depends_on = [
@@ -64,7 +64,7 @@ module "key_vault" {
   name                       = var.key_vault_name
   location                   = var.location
   resource_group_name        = module.resource_group.name
-  soft_delete_retention_days = 7 # Kept low for dev based on plan
+  soft_delete_retention_days = 90 # Production retention
   tags                       = local.tags
 }
 
@@ -73,7 +73,7 @@ module "storage_account" {
   name                = var.storage_account_name
   location            = var.location
   resource_group_name = module.resource_group.name
-  replication_type    = "LRS" # Dev defaults
+  replication_type    = "GRS" # Geo-redundant for prod
   tags                = local.tags
 }
 

@@ -1,34 +1,65 @@
-# Terraform scaffold — AKS module
-# ⚠️ This is a scaffold. No real Terraform code currently exists.
-# Full Terraform implementation is a future infrastructure milestone.
-
 variable "cluster_name" {
-  description = "AKS cluster name"
   type        = string
-}
-
-variable "resource_group_name" {
-  description = "Azure resource group name"
-  type        = string
+  description = "Name of the AKS cluster"
 }
 
 variable "location" {
+  type        = string
   description = "Azure region"
-  type        = string
-  default     = "eastus"
 }
 
-variable "node_count" {
-  description = "Initial node pool count"
+variable "resource_group_name" {
+  type        = string
+  description = "Name of the resource group"
+}
+
+variable "dns_prefix" {
+  type        = string
+  description = "DNS prefix for the AKS cluster"
+}
+
+variable "kubernetes_version" {
+  type        = string
+  description = "Kubernetes version to use"
+  default     = null # Use Azure default
+}
+
+variable "vnet_subnet_id" {
+  type        = string
+  description = "Subnet ID for the default node pool"
+}
+
+variable "system_node_vm_size" {
+  type        = string
+  description = "VM size for the system node pool"
+  default     = "Standard_B2s"
+}
+
+variable "system_node_auto_scaling" {
+  type        = bool
+  description = "Enable auto scaling for system node pool"
+  default     = true
+}
+
+variable "system_node_min_count" {
   type        = number
-  default     = 2
+  description = "Min node count for system pool"
+  default     = 1
 }
 
-variable "vm_size" {
-  description = "Node VM size"
+variable "system_node_max_count" {
+  type        = number
+  description = "Max node count for system pool"
+  default     = 3
+}
+
+variable "log_analytics_workspace_id" {
   type        = string
-  default     = "Standard_D2s_v3"
+  description = "ID of the Log Analytics workspace for monitoring"
 }
 
-# TODO: Implement AKS cluster resource
-# resource "azurerm_kubernetes_cluster" "resolveops" { ... }
+variable "tags" {
+  type        = map(string)
+  description = "Tags to apply to the AKS cluster"
+  default     = {}
+}

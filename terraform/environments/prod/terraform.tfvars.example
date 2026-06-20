@@ -1,0 +1,31 @@
+project_name                 = "resolveops"
+environment                  = "prod"
+location                     = "eastus"
+owner                        = "admin"
+resource_group_name          = "rg-resolveops-prod"
+vnet_name                    = "vnet-resolveops-prod"
+vnet_address_space           = ["10.1.0.0/16"]
+
+subnets = {
+  "aks" = {
+    address_prefixes = ["10.1.1.0/24"]
+  }
+}
+
+acr_name                     = "acrresolveopsprod123"
+aks_cluster_name             = "aks-resolveops-prod"
+key_vault_name               = "kv-resolveops-prod-123"
+storage_account_name         = "stresolveopsprod123"
+log_analytics_workspace_name = "law-resolveops-prod"
+workload_identity_name       = "id-resolveops-workload-prod"
+aks_namespace                = "resolveops-prod"
+workload_identity_service_account = "resolveops-workload-identity-sa"
+
+enable_service_bus       = true
+enable_private_aks       = false
+enable_private_endpoints = false
+enable_app_gateway       = false
+
+tags = {
+  Purpose = "Production"
+}
