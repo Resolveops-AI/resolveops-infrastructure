@@ -1,48 +1,147 @@
 # Infrastructure as Code (IaC) Implementation Report
 
-This document outlines the Terraform setup for the ResolveOps AI Azure AKS capstone environment and explains how the Terraform outputs map to the required GitHub Actions variables in the `resolveops-application` repository.
+This document describes the Terraform infrastructure for the ResolveOps AI + QuickHaul Transits
+two-cluster AKS architecture and explains how outputs map to GitHub Actions variables.
 
-## Overview
+---
 
-The infrastructure for the `dev` environment has been implemented using Terraform modules for standardization. The state is managed remotely using Azure Blob Storage.
+## Architecture Overview
 
-Key components deployed:
-- Resource Group
-- Virtual Network & Subnets
-- Azure Container Registry (ACR) - Basic SKU for dev
-- Azure Kubernetes Service (AKS) - Includes Workload Identity and OIDC enabled
-- Log Analytics Workspace (LAW)
-- Key Vault - RBAC enabled
-- Storage Account
-- Azure Service Bus (Optional)
+ResolveOps AI uses **two dedicated AKS clusters**:
+
+| Cluster | Name | Purpose |
+|---|---|---|
+| ResolveOps Platform | `resolveops-aks` | Hosts all ResolveOps AI microservices |
+| QuickHaul Workload | `quickhaul-aks` | Hosts QuickHaul Transits app (monitored workload) |
+
+### Why Two Clusters?
+
+| Concern | Reason |
+|---|---|
+| **Blast radius isolation** | A broken ResolveOps deploy cannot take down the monitored QuickHaul cluster |
+| **Monitoring independence** | ResolveOps monitors QuickHaul cross-cluster via Azure Monitor and Prometheus remote_write |
+| **RBAC isolation** | Each cluster has its own RBAC; QuickHaul team cannot access ResolveOps secrets |
+| **GitOps clarity** | Argo CD runs in `quickhaul-aks` and manages only QuickHaul. ResolveOps CI/CD is separate |
+| **Demo cost** | Both clusters use `Standard_B2s` with min 1 node — minimal cost |
+
+---
+
+## Namespace Design
+
+| Cluster | Namespace | Managed By | Purpose |
+|---|---|---|---|
+| `resolveops-aks` | `resolveops` | Terraform creates · Helm deploys | All ResolveOps AI platform services |
+| `quickhaul-aks` | `quickhaul-dev` | Terraform creates · Argo CD deploys | QuickHaul dev environment |
+| `quickhaul-aks` | `quickhaul-prod` | Terraform creates · Argo CD deploys | QuickHaul prod environment |
+| `quickhaul-aks` | `argocd` | Terraform creates · Helm bootstraps | Argo CD GitOps controller |
+
+### Why ResolveOps Has One Namespace
+
+ResolveOps is an **operations platform**, not a customer-facing application with stages.
+It does not need dev/prod namespace separation — it is always "the monitoring platform."
+Separating it would add complexity with no operational benefit.
+
+### Why QuickHaul Has Two Namespaces
+
+QuickHaul is the **monitored workload**. Argo CD manages separate GitOps environments
+(`quickhaul-dev` and `quickhaul-prod`) from the same cluster so developers can promote
+changes through environments with full isolation.
+
+---
+
+## What Terraform Owns
+
+- Azure Resource Groups
+- Virtual Networks and Subnets
+- Azure Container Registry (ACR) — one shared registry
+- AKS Clusters (`resolveops-aks`, `quickhaul-aks`)
+- Log Analytics Workspaces
+- Key Vaults
+- Storage Accounts
+- User Assigned Managed Identities (Workload Identity)
+- Azure Role Assignments (AcrPull, Key Vault Secrets User, Storage Blob Data Contributor)
+- Kubernetes Namespace objects (bootstrap only — no workloads)
+
+## What Helm / Argo CD Owns
+
+- All Kubernetes Deployments
+- All Kubernetes Services
+- All Kubernetes ConfigMaps and Secrets
+- Argo CD installation (via Helm into the `argocd` namespace)
+- QuickHaul application charts (deployed by Argo CD from `quickhaul-dev` and `quickhaul-prod`)
+- ResolveOps microservice charts (deployed by Helm CI/CD into `resolveops`)
+
+---
+
+## How ResolveOps Monitors QuickHaul
+
+ResolveOps AI monitors the QuickHaul cluster cross-cluster using:
+
+1. **Azure Monitor / Container Insights** — both clusters ship metrics/logs to their respective
+   Log Analytics Workspaces. ResolveOps reads these via Azure Monitor APIs.
+2. **Prometheus remote_write** (future) — QuickHaul's in-cluster Prometheus can be configured
+   to remote_write to the ResolveOps Prometheus/Thanos endpoint.
+3. **GitHub Intelligence Service** — ResolveOps reads QuickHaul GitHub events (commits, PRs, incidents)
+   to correlate deployments with anomalies.
+
+---
+
+## Terraform Structure
+
+```text
+terraform/
+  modules/
+    aks/                        # AKS cluster — reused for both clusters
+    acr/                        # Azure Container Registry
+    networking/                 # VNet + subnets
+    key-vault/                  # Key Vault with RBAC
+    storage-account/            # Storage Account
+    log-analytics/              # Log Analytics Workspace
+    workload-identity/          # User Assigned Managed Identity + Fed Credential
+    role-assignments/           # RBAC role assignments
+    service-bus/                # Azure Service Bus (optional)
+    kubernetes-namespaces/      # [NEW] Creates K8s namespaces — used by both envs
+  environments/
+    dev/   → resolveops cluster # resolveops-aks + resolveops namespace + ACR + KV
+    prod/  → quickhaul cluster  # quickhaul-aks + quickhaul-dev/prod/argocd namespaces
+```
+
+---
 
 ## GitHub Variables Mapping
 
-Once Terraform has been successfully applied, several outputs are generated. These outputs must be copied to the `resolveops-application` repository's GitHub Variables and Secrets to enable the CI/CD pipelines to build, push, and deploy the application.
+### ResolveOps Environment (`terraform/environments/dev`)
 
-### Variables
+| Terraform Output | GitHub Variable | Description |
+|---|---|---|
+| `resolveops_aks_name` | `AKS_CLUSTER_NAME` | ResolveOps AKS cluster name |
+| `acr_name` | `ACR_NAME` | Shared ACR name |
+| `acr_login_server` | `ACR_LOGIN_SERVER` | Shared ACR login server URL |
+| `resource_group_name` | `AZURE_RESOURCE_GROUP` | ResolveOps resource group |
+| `resolveops_namespace` | `AKS_NAMESPACE` | Kubernetes namespace for ResolveOps |
+| `workload_identity_client_id` | `WORKLOAD_IDENTITY_CLIENT_ID` | Workload Identity Client ID |
+| `key_vault_name` | `KEY_VAULT_NAME` | ResolveOps Key Vault |
+| `tenant_id` | `AZURE_TENANT_ID` | Azure Tenant ID |
 
-| Terraform Output Name | Application GitHub Variable Name | Description |
-|-----------------------|----------------------------------|-------------|
-| `acr_login_server` | `ACR_LOGIN_SERVER` | The URL of the Azure Container Registry (e.g., `acrresolveopsdev123.azurecr.io`). |
-| `acr_name` | `ACR_NAME` | The name of the Azure Container Registry (e.g., `acrresolveopsdev123`). |
-| `resource_group_name` | `AZURE_RESOURCE_GROUP` | The name of the Azure Resource Group where the AKS cluster and ACR reside. |
-| `aks_cluster_name` | `AKS_CLUSTER_NAME` | The name of the AKS cluster. |
-| *(From tfvars)* | `AKS_NAMESPACE` | The target namespace for deployment in AKS (e.g., `resolveops-dev`). |
-| `workload_identity_client_id` | `WORKLOAD_IDENTITY_CLIENT_ID` | The Client ID of the User Assigned Managed Identity used for Workload Identity. |
-| `key_vault_name` | `KEY_VAULT_NAME` | The name of the Azure Key Vault used by the application. |
-| `tenant_id` | `AZURE_TENANT_ID` | The Azure Active Directory Tenant ID. |
+### QuickHaul Environment (`terraform/environments/prod`)
 
-### Configuration Steps
+| Terraform Output | GitHub Variable | Description |
+|---|---|---|
+| `quickhaul_aks_name` | `QUICKHAUL_AKS_CLUSTER_NAME` | QuickHaul AKS cluster name |
+| `acr_name` | `ACR_NAME` | Shared ACR name |
+| `acr_login_server` | `ACR_LOGIN_SERVER` | Shared ACR login server URL |
+| `resource_group_name` | `QUICKHAUL_RESOURCE_GROUP` | QuickHaul resource group |
+| `quickhaul_dev_namespace` | `QUICKHAUL_DEV_NAMESPACE` | QuickHaul dev namespace |
+| `quickhaul_prod_namespace` | `QUICKHAUL_PROD_NAMESPACE` | QuickHaul prod namespace |
+| `argocd_namespace` | `ARGOCD_NAMESPACE` | Argo CD namespace |
+| `tenant_id` | `AZURE_TENANT_ID` | Azure Tenant ID |
 
-1. Run the Terraform workflow for the `dev` environment or run it locally.
-2. Observe the Terraform outputs at the end of the `terraform apply` stage.
-3. In the `resolveops-application` GitHub repository, navigate to **Settings > Secrets and variables > Actions**.
-4. Click on the **Variables** tab.
-5. For each variable listed in the table above, click **New repository variable**, enter the corresponding GitHub Variable Name and the value from the Terraform output, and save.
+---
 
 ## Security Controls
 
-- **Checkov**: Static analysis is enforced on all PRs modifying `terraform/**`. It is configured for a hard fail on any policy violation.
-- **Key Vault**: Uses RBAC authorization.
-- **AKS**: Managed Identities are used for authentication (OIDC and Workload Identity), removing the need to manage Service Principal secrets. No local admin accounts are used.
+- **Checkov**: Static analysis enforced on all PRs to `terraform/**`. Hard fail on violations.
+- **Key Vault**: RBAC authorization. No access policy mode.
+- **AKS**: Managed Identities (OIDC + Workload Identity). No local admin accounts, no service principal secrets.
+- **ACR**: AcrPull is granted to both AKS kubelet identities — no admin credentials needed.
+- **Secrets**: No secrets are hardcoded. All credentials flow through Workload Identity federation.

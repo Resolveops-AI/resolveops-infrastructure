@@ -28,7 +28,7 @@ module "acr" {
   name                = var.acr_name
   resource_group_name = module.resource_group.name
   location            = var.location
-  sku                 = "Basic" # Keep simple for dev
+  sku                 = "Basic" # Keep simple for demo/resolveops platform
   tags                = local.tags
 }
 
@@ -40,15 +40,17 @@ module "log_analytics" {
   tags                = local.tags
 }
 
+# Cluster 1: resolveops-aks — hosts the ResolveOps AI platform microservices.
+# One cluster, one namespace (resolveops). No dev/prod split needed for the platform itself.
 module "aks" {
   source                     = "../../modules/aks"
-  cluster_name               = var.aks_cluster_name
+  cluster_name               = var.resolveops_aks_name
   location                   = var.location
   resource_group_name        = module.resource_group.name
-  dns_prefix                 = "${var.aks_cluster_name}-dns"
+  dns_prefix                 = "${var.resolveops_aks_name}-dns"
   vnet_subnet_id             = module.networking.subnet_ids["aks"]
   log_analytics_workspace_id = module.log_analytics.id
-  system_node_vm_size        = "Standard_B2s" # Small size for dev
+  system_node_vm_size        = "Standard_B2s" # Cost-conscious demo size
   system_node_auto_scaling   = true
   system_node_min_count      = 1
   system_node_max_count      = 3
@@ -64,7 +66,7 @@ module "key_vault" {
   name                       = var.key_vault_name
   location                   = var.location
   resource_group_name        = module.resource_group.name
-  soft_delete_retention_days = 7 # Kept low for dev based on plan
+  soft_delete_retention_days = 7
   tags                       = local.tags
 }
 
@@ -73,17 +75,18 @@ module "storage_account" {
   name                = var.storage_account_name
   location            = var.location
   resource_group_name = module.resource_group.name
-  replication_type    = "LRS" # Dev defaults
+  replication_type    = "LRS"
   tags                = local.tags
 }
 
+# Workload Identity for ResolveOps platform services (e.g., auth-service, ai-rca-service)
 module "workload_identity" {
   source                    = "../../modules/workload-identity"
   name                      = var.workload_identity_name
   location                  = var.location
   resource_group_name       = module.resource_group.name
   oidc_issuer_url           = module.aks.oidc_issuer_url
-  service_account_namespace = var.aks_namespace
+  service_account_namespace = var.resolveops_namespace
   service_account_name      = var.workload_identity_service_account
   tags                      = local.tags
 
@@ -92,6 +95,7 @@ module "workload_identity" {
   ]
 }
 
+# RBAC: allow resolveops-aks kubelet to pull from ACR, and workload identity to access KV/storage
 module "role_assignments" {
   source                         = "../../modules/role-assignments"
   acr_id                         = module.acr.id
@@ -116,4 +120,23 @@ module "service_bus" {
   location            = var.location
   resource_group_name = module.resource_group.name
   tags                = local.tags
+}
+
+# Terraform-managed Kubernetes namespaces in resolveops-aks.
+# Application workloads are deployed by Helm/Argo CD — Terraform only bootstraps the namespace objects.
+module "resolveops_namespaces" {
+  source = "../../modules/kubernetes-namespaces"
+
+  namespaces = [
+    var.resolveops_namespace,
+  ]
+
+  labels = {
+    "app.kubernetes.io/managed-by" = "terraform"
+    "cluster"                      = var.resolveops_aks_name
+  }
+
+  depends_on = [
+    module.aks
+  ]
 }

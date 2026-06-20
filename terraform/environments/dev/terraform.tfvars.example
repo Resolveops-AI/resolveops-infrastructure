@@ -1,9 +1,9 @@
 project_name                 = "resolveops"
-environment                  = "dev"
+environment                  = "resolveops"
 location                     = "eastus"
 owner                        = "admin"
-resource_group_name          = "rg-resolveops-dev"
-vnet_name                    = "vnet-resolveops-dev"
+resource_group_name          = "rg-resolveops-platform"
+vnet_name                    = "vnet-resolveops"
 vnet_address_space           = ["10.0.0.0/16"]
 
 subnets = {
@@ -12,13 +12,19 @@ subnets = {
   }
 }
 
-acr_name                     = "acrresolveopsdev123"
-aks_cluster_name             = "aks-resolveops-dev"
-key_vault_name               = "kv-resolveops-dev-123"
-storage_account_name         = "stresolveopsdev123"
-log_analytics_workspace_name = "law-resolveops-dev"
-workload_identity_name       = "id-resolveops-workload-dev"
-aks_namespace                = "resolveops-dev"
+# ACR is shared — both clusters pull from the same registry
+acr_name = "acrresolveops123"
+
+# Cluster 1: ResolveOps platform cluster
+resolveops_aks_name = "resolveops-aks"
+
+key_vault_name               = "kv-resolveops-123"
+storage_account_name         = "stresolveops123"
+log_analytics_workspace_name = "law-resolveops"
+workload_identity_name       = "id-resolveops-workload"
+
+# Single platform namespace — ResolveOps does not need dev/prod splits.
+resolveops_namespace              = "resolveops"
 workload_identity_service_account = "resolveops-workload-identity-sa"
 
 enable_service_bus       = false
@@ -27,5 +33,5 @@ enable_private_endpoints = false
 enable_app_gateway       = false
 
 tags = {
-  Purpose = "Evaluation"
+  Purpose = "ResolveOps-Platform"
 }

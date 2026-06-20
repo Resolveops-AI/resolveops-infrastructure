@@ -1,26 +1,48 @@
-output "resource_group_name" {
-  value       = module.resource_group.name
-  description = "Resource Group Name"
-}
+data "azurerm_client_config" "current" {}
 
-output "aks_cluster_name" {
+# --- Cluster ---
+output "quickhaul_aks_name" {
   value       = module.aks.name
-  description = "AKS Cluster Name"
+  description = "Name of the QuickHaul AKS cluster"
 }
 
+# --- Namespaces ---
+output "quickhaul_dev_namespace" {
+  value       = var.quickhaul_dev_namespace
+  description = "Kubernetes namespace for QuickHaul dev workloads"
+}
+
+output "quickhaul_prod_namespace" {
+  value       = var.quickhaul_prod_namespace
+  description = "Kubernetes namespace for QuickHaul prod workloads"
+}
+
+output "argocd_namespace" {
+  value       = var.argocd_namespace
+  description = "Kubernetes namespace where Argo CD is installed"
+}
+
+# --- ACR (shared, read from resolveops environment) ---
 output "acr_name" {
-  value       = module.acr.name
-  description = "ACR Name"
+  value       = data.azurerm_container_registry.shared_acr.name
+  description = "ACR Name (shared registry)"
 }
 
 output "acr_login_server" {
-  value       = module.acr.login_server
-  description = "ACR Login Server"
+  value       = data.azurerm_container_registry.shared_acr.login_server
+  description = "ACR Login Server (shared registry)"
 }
 
+# --- Resource Groups ---
+output "resource_group_name" {
+  value       = module.resource_group.name
+  description = "QuickHaul Resource Group Name"
+}
+
+# --- Key Vault ---
 output "key_vault_name" {
   value       = module.key_vault.name
-  description = "Key Vault Name"
+  description = "Key Vault Name for QuickHaul"
 }
 
 output "key_vault_uri" {
@@ -28,14 +50,16 @@ output "key_vault_uri" {
   description = "Key Vault URI"
 }
 
+# --- Storage ---
 output "storage_account_name" {
   value       = module.storage_account.name
   description = "Storage Account Name"
 }
 
+# --- Workload Identity ---
 output "workload_identity_client_id" {
   value       = module.workload_identity.client_id
-  description = "Workload Identity Client ID"
+  description = "Workload Identity Client ID for QuickHaul services"
 }
 
 output "workload_identity_principal_id" {
@@ -43,6 +67,7 @@ output "workload_identity_principal_id" {
   description = "Workload Identity Principal ID"
 }
 
+# --- Identity ---
 output "tenant_id" {
   value       = data.azurerm_client_config.current.tenant_id
   description = "Azure Tenant ID"
@@ -50,7 +75,5 @@ output "tenant_id" {
 
 output "oidc_issuer_url" {
   value       = module.aks.oidc_issuer_url
-  description = "AKS OIDC Issuer URL"
+  description = "QuickHaul AKS OIDC Issuer URL"
 }
-
-data "azurerm_client_config" "current" {}

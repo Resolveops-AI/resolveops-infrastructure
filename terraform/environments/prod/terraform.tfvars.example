@@ -1,10 +1,12 @@
-project_name                 = "resolveops"
-environment                  = "prod"
-location                     = "eastus"
-owner                        = "admin"
-resource_group_name          = "rg-resolveops-prod"
-vnet_name                    = "vnet-resolveops-prod"
-vnet_address_space           = ["10.1.0.0/16"]
+project_name = "quickhaul"
+environment  = "quickhaul"
+location     = "eastus"
+owner        = "admin"
+
+# QuickHaul cluster gets its own resource group
+resource_group_name = "rg-quickhaul"
+vnet_name           = "vnet-quickhaul"
+vnet_address_space  = ["10.1.0.0/16"]
 
 subnets = {
   "aks" = {
@@ -12,20 +14,30 @@ subnets = {
   }
 }
 
-acr_name                     = "acrresolveopsprod123"
-aks_cluster_name             = "aks-resolveops-prod"
-key_vault_name               = "kv-resolveops-prod-123"
-storage_account_name         = "stresolveopsprod123"
-log_analytics_workspace_name = "law-resolveops-prod"
-workload_identity_name       = "id-resolveops-workload-prod"
-aks_namespace                = "resolveops-prod"
-workload_identity_service_account = "resolveops-workload-identity-sa"
+# Shared ACR is owned by the resolveops environment.
+# Provide the ACR name and the resource group where it lives.
+acr_name                = "acrresolveops123"
+acr_resource_group_name = "rg-resolveops-platform"
 
-enable_service_bus       = true
+# Cluster 2: QuickHaul workload cluster
+quickhaul_aks_name = "quickhaul-aks"
+
+key_vault_name               = "kv-quickhaul-123"
+storage_account_name         = "stquickhaul123"
+log_analytics_workspace_name = "law-quickhaul"
+workload_identity_name       = "id-quickhaul-workload"
+workload_identity_service_account = "quickhaul-workload-identity-sa"
+
+# QuickHaul needs dev/prod namespace separation for Argo CD GitOps environments.
+quickhaul_dev_namespace  = "quickhaul-dev"
+quickhaul_prod_namespace = "quickhaul-prod"
+argocd_namespace         = "argocd"
+
+enable_service_bus       = false
 enable_private_aks       = false
 enable_private_endpoints = false
 enable_app_gateway       = false
 
 tags = {
-  Purpose = "Production"
+  Purpose = "QuickHaul-Workload"
 }

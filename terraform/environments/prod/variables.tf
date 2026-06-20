@@ -5,7 +5,7 @@ variable "project_name" {
 
 variable "environment" {
   type        = string
-  description = "Environment name (e.g., dev, prod)"
+  description = "Environment label (e.g., quickhaul)"
 }
 
 variable "location" {
@@ -20,7 +20,7 @@ variable "owner" {
 
 variable "resource_group_name" {
   type        = string
-  description = "Name of the resource group"
+  description = "Name of the resource group for the QuickHaul cluster"
 }
 
 variable "vnet_name" {
@@ -40,19 +40,28 @@ variable "subnets" {
   description = "Map of subnets"
 }
 
+# ACR is shared between both clusters. The prod (quickhaul) environment reads
+# the existing ACR via data source rather than managing it.
 variable "acr_name" {
   type        = string
-  description = "ACR name"
+  description = "Name of the shared Azure Container Registry (managed by the resolveops environment)"
 }
 
-variable "aks_cluster_name" {
+variable "acr_resource_group_name" {
   type        = string
-  description = "AKS cluster name"
+  description = "Resource group where the shared ACR resides (the resolveops resource group)"
+}
+
+# Cluster 2: QuickHaul AKS
+variable "quickhaul_aks_name" {
+  type        = string
+  description = "Name of the QuickHaul AKS cluster"
+  default     = "quickhaul-aks"
 }
 
 variable "key_vault_name" {
   type        = string
-  description = "Key Vault name"
+  description = "Key Vault name for QuickHaul secrets"
 }
 
 variable "storage_account_name" {
@@ -67,17 +76,33 @@ variable "log_analytics_workspace_name" {
 
 variable "workload_identity_name" {
   type        = string
-  description = "Workload identity name"
-}
-
-variable "aks_namespace" {
-  type        = string
-  description = "Namespace for AKS Workload Identity"
+  description = "Workload identity name for QuickHaul services"
 }
 
 variable "workload_identity_service_account" {
   type        = string
-  description = "Service account for Workload Identity"
+  description = "Service account name for Workload Identity"
+}
+
+# QuickHaul needs dev/prod namespace separation so that Argo CD can manage
+# two independent GitOps environments from one cluster.
+variable "quickhaul_dev_namespace" {
+  type        = string
+  description = "Kubernetes namespace for QuickHaul dev environment"
+  default     = "quickhaul-dev"
+}
+
+variable "quickhaul_prod_namespace" {
+  type        = string
+  description = "Kubernetes namespace for QuickHaul prod environment"
+  default     = "quickhaul-prod"
+}
+
+# Argo CD namespace — bootstrapped by Terraform, populated by Helm.
+variable "argocd_namespace" {
+  type        = string
+  description = "Kubernetes namespace for Argo CD (GitOps controller)"
+  default     = "argocd"
 }
 
 variable "enable_service_bus" {

@@ -5,7 +5,7 @@ variable "project_name" {
 
 variable "environment" {
   type        = string
-  description = "Environment name (e.g., dev, prod)"
+  description = "Environment name (e.g., resolveops)"
 }
 
 variable "location" {
@@ -20,7 +20,7 @@ variable "owner" {
 
 variable "resource_group_name" {
   type        = string
-  description = "Name of the resource group"
+  description = "Name of the resource group for the ResolveOps platform cluster"
 }
 
 variable "vnet_name" {
@@ -42,17 +42,19 @@ variable "subnets" {
 
 variable "acr_name" {
   type        = string
-  description = "ACR name"
+  description = "ACR name (shared by both clusters)"
 }
 
-variable "aks_cluster_name" {
+# Renamed from aks_cluster_name to make the purpose explicit.
+variable "resolveops_aks_name" {
   type        = string
-  description = "AKS cluster name"
+  description = "Name of the ResolveOps AKS cluster"
+  default     = "resolveops-aks"
 }
 
 variable "key_vault_name" {
   type        = string
-  description = "Key Vault name"
+  description = "Key Vault name for ResolveOps platform secrets"
 }
 
 variable "storage_account_name" {
@@ -67,12 +69,15 @@ variable "log_analytics_workspace_name" {
 
 variable "workload_identity_name" {
   type        = string
-  description = "Workload identity name"
+  description = "Workload identity name for ResolveOps platform services"
 }
 
-variable "aks_namespace" {
+# The single namespace where all ResolveOps platform microservices run.
+# ResolveOps does not need dev/prod namespace separation — it IS the monitoring platform.
+variable "resolveops_namespace" {
   type        = string
-  description = "Namespace for AKS Workload Identity"
+  description = "Kubernetes namespace for ResolveOps platform microservices"
+  default     = "resolveops"
 }
 
 variable "workload_identity_service_account" {
