@@ -49,7 +49,7 @@ terraform/
     service-bus/           # Azure Service Bus (optional)
     kubernetes-namespaces/ # [NEW] Kubernetes namespace bootstrap module
 
-  environments/
+  environments/          # [DEPRECATED] Former env structure, superseded by terraform/platform
     dev/   → resolveops-aks cluster
              - namespace: resolveops
              - ACR, Key Vault, Storage, Workload Identity owned here
