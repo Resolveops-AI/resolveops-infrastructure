@@ -28,6 +28,11 @@ output "argocd_namespace" {
   description = "Argo CD namespace in quickhaul-aks"
 }
 
+output "monitoring_namespace" {
+  value       = var.monitoring_namespace
+  description = "Monitoring namespace in quickhaul-aks"
+}
+
 output "acr_name" {
   value       = module.acr.name
   description = "Container registry name"

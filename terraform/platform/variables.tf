@@ -78,6 +78,12 @@ variable "argocd_namespace" {
   default     = "argocd"
 }
 
+variable "monitoring_namespace" {
+  type        = string
+  description = "Namespace for monitoring in quickhaul-aks"
+  default     = "monitoring"
+}
+
 variable "workload_identity_name" {
   type        = string
   description = "Managed Identity name for ResolveOps pods"

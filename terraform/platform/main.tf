@@ -162,3 +162,14 @@ resource "kubernetes_namespace_v1" "argocd" {
 
   depends_on = [module.quickhaul_aks]
 }
+
+# Monitoring namespace in quickhaul-aks — Prometheus and Grafana are installed here by Helm
+resource "kubernetes_namespace_v1" "monitoring" {
+  provider = kubernetes.quickhaul
+
+  metadata {
+    name = var.monitoring_namespace
+  }
+
+  depends_on = [module.quickhaul_aks]
+}
