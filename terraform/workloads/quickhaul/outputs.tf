@@ -1,5 +1,3 @@
-# Note: data.azurerm_client_config.current is declared in main.tf
-
 output "quickhaul_aks_name" {
   value       = data.azurerm_kubernetes_cluster.quickhaul_aks.name
   description = "QuickHaul AKS cluster name"
@@ -37,10 +35,10 @@ output "acr_login_server" {
 
 output "workload_identity_client_id" {
   value       = module.workload_identity.client_id
-  description = "QuickHaul Workload Identity Client ID"
+  description = "Workload Identity client ID for QuickHaul pods"
 }
 
 output "azure_tenant_id" {
   value       = data.azurerm_client_config.current.tenant_id
-  description = "Azure Tenant ID"
+  description = "Azure tenant ID"
 }

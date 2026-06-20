@@ -1,21 +1,17 @@
 location = "eastus"
 
-# Platform resource group (where quickhaul-aks was created by terraform/platform/)
 platform_resource_group_name = "rg-resolveops-platform"
 quickhaul_aks_name           = "quickhaul-aks"
 acr_name                     = "acrresolveops123"
 
-# QuickHaul namespaces (must match platform variables)
 quickhaul_dev_namespace  = "quickhaul-dev"
 quickhaul_prod_namespace = "quickhaul-prod"
 
-# QuickHaul-specific Azure resources
 resource_group_name    = "rg-quickhaul"
 key_vault_name         = "kv-quickhaul-123"
 workload_identity_name = "id-quickhaul-workload"
-workload_identity_service_account = "quickhaul-workload-sa"
 
 tags = {
+  Project = "quickhaul"
   Owner   = "quickhaul-team"
-  Purpose = "QuickHaul-Workload"
 }

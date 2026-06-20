@@ -1,49 +1,30 @@
-project_name        = "resolveops"
 location            = "eastus"
 resource_group_name = "rg-resolveops-platform"
 
 vnet_name          = "vnet-resolveops-platform"
 vnet_address_space = ["10.0.0.0/16"]
 
-# Two subnets — one per AKS cluster.
 subnets = {
-  "resolveops-aks" = {
-    address_prefixes = ["10.0.1.0/24"]
-  }
-  "quickhaul-aks" = {
-    address_prefixes = ["10.0.2.0/24"]
-  }
+  "resolveops-aks" = { address_prefixes = ["10.0.1.0/24"] }
+  "quickhaul-aks"  = { address_prefixes = ["10.0.2.0/24"] }
 }
 
-# Shared ACR — both clusters pull images from here.
-acr_name = "acrresolveops123"
-
+acr_name                     = "acrresolveops123"
 log_analytics_workspace_name = "law-resolveops-platform"
 key_vault_name               = "kv-resolveops-platform"
 
-# ---------------------------------------------------------------------------
-# Cluster 1 — ResolveOps platform cluster
-# One cluster, one namespace. ResolveOps has no dev/prod split.
-# ---------------------------------------------------------------------------
-resolveops_aks_name = "resolveops-aks"
+resolveops_aks_name  = "resolveops-aks"
 resolveops_namespace = "resolveops"
 
-# ---------------------------------------------------------------------------
-# Cluster 2 — QuickHaul workload cluster
-# Two namespaces because Argo CD manages dev/prod environment promotion.
-# ---------------------------------------------------------------------------
 quickhaul_aks_name       = "quickhaul-aks"
 quickhaul_dev_namespace  = "quickhaul-dev"
 quickhaul_prod_namespace = "quickhaul-prod"
 argocd_namespace         = "argocd"
 
-# ---------------------------------------------------------------------------
-# Workload Identity for ResolveOps platform pods
-# ---------------------------------------------------------------------------
 workload_identity_name            = "id-resolveops-workload"
 workload_identity_service_account = "resolveops-workload-sa"
 
 tags = {
+  Project = "resolveops"
   Owner   = "platform-team"
-  Purpose = "ResolveOps-Platform"
 }

@@ -1,17 +1,11 @@
-variable "project_name" {
-  type        = string
-  description = "Project name used for tagging"
-  default     = "resolveops"
-}
-
 variable "location" {
   type        = string
-  description = "Azure region for all platform resources"
+  description = "Azure region"
 }
 
 variable "resource_group_name" {
   type        = string
-  description = "Name of the shared platform resource group"
+  description = "Resource group for all platform resources"
 }
 
 variable "vnet_name" {
@@ -21,58 +15,45 @@ variable "vnet_name" {
 
 variable "vnet_address_space" {
   type        = list(string)
-  description = "Address space for the platform VNet"
+  description = "Address space for the VNet"
 }
 
-# The platform VNet needs two subnets: one per AKS cluster.
-# Example:
-#   subnets = {
-#     "resolveops-aks" = { address_prefixes = ["10.0.1.0/24"] }
-#     "quickhaul-aks"  = { address_prefixes = ["10.0.2.0/24"] }
-#   }
 variable "subnets" {
   type = map(object({
     address_prefixes = list(string)
   }))
-  description = "Subnet map — must include 'resolveops-aks' and 'quickhaul-aks' keys"
+  description = "Subnets map — must include 'resolveops-aks' and 'quickhaul-aks'"
 }
 
 variable "acr_name" {
   type        = string
-  description = "Name of the shared Azure Container Registry (must be globally unique)"
+  description = "Azure Container Registry name (must be globally unique)"
 }
 
 variable "log_analytics_workspace_name" {
   type        = string
-  description = "Name of the shared Log Analytics Workspace"
+  description = "Log Analytics workspace name"
 }
 
 variable "key_vault_name" {
   type        = string
-  description = "Name of the ResolveOps platform Key Vault"
+  description = "Key Vault name for ResolveOps platform secrets"
 }
 
-# ---------------------------------------------------------------------------
-# Cluster 1: ResolveOps platform cluster
-# ResolveOps AI has ONE cluster and ONE namespace — no environment split.
-# ---------------------------------------------------------------------------
+# ResolveOps runs on one cluster with one namespace — no dev/prod split needed
 variable "resolveops_aks_name" {
   type        = string
   description = "Name of the ResolveOps AKS cluster"
   default     = "resolveops-aks"
 }
 
-# The single namespace where all ResolveOps microservices run.
 variable "resolveops_namespace" {
   type        = string
-  description = "Kubernetes namespace for ResolveOps platform microservices"
+  description = "Kubernetes namespace for ResolveOps services"
   default     = "resolveops"
 }
 
-# ---------------------------------------------------------------------------
-# Cluster 2: QuickHaul workload cluster
-# QuickHaul needs dev/prod namespaces for Argo CD GitOps env separation.
-# ---------------------------------------------------------------------------
+# QuickHaul runs on its own cluster with dev and prod namespaces
 variable "quickhaul_aks_name" {
   type        = string
   description = "Name of the QuickHaul AKS cluster"
@@ -81,38 +62,35 @@ variable "quickhaul_aks_name" {
 
 variable "quickhaul_dev_namespace" {
   type        = string
-  description = "QuickHaul development namespace"
+  description = "QuickHaul dev namespace"
   default     = "quickhaul-dev"
 }
 
 variable "quickhaul_prod_namespace" {
   type        = string
-  description = "QuickHaul production namespace"
+  description = "QuickHaul prod namespace"
   default     = "quickhaul-prod"
 }
 
 variable "argocd_namespace" {
   type        = string
-  description = "Argo CD namespace in the QuickHaul cluster"
+  description = "Namespace for Argo CD in quickhaul-aks"
   default     = "argocd"
 }
 
-# ---------------------------------------------------------------------------
-# Workload Identity (ResolveOps platform pods)
-# ---------------------------------------------------------------------------
 variable "workload_identity_name" {
   type        = string
-  description = "Name of the User Assigned Managed Identity for ResolveOps pods"
+  description = "Managed Identity name for ResolveOps pods"
 }
 
 variable "workload_identity_service_account" {
   type        = string
-  description = "Kubernetes service account name to federate with the Workload Identity"
+  description = "Kubernetes service account federated to the Workload Identity"
   default     = "resolveops-workload-sa"
 }
 
 variable "tags" {
   type        = map(string)
-  description = "Additional tags applied to all resources"
+  description = "Tags to apply to all resources"
   default     = {}
 }
