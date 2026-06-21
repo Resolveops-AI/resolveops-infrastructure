@@ -64,28 +64,13 @@ variable "tags" {
   default     = {}
 }
 
-variable "enable_agic" {
-  type        = bool
-  description = "Enable Application Gateway Ingress Controller"
-  default     = false
-}
-
-variable "appgw_subnet_id" {
-  type        = string
-  description = "Subnet ID for the Application Gateway"
-  default     = null
-}
+# Note: enable_agic and appgw_gateway_id removed — the managed AGIC addon is not
+# supported on private AKS clusters. AGIC is installed via Helm post-provisioning.
 
 variable "private_cluster_enabled" {
   type        = bool
-  description = "Enable private cluster"
-  default     = false
-}
-
-variable "appgw_gateway_id" {
-  type        = string
-  description = "Application Gateway ID for AGIC"
-  default     = null
+  description = "Enable private cluster (satisfies org MG policy)"
+  default     = true
 }
 
 variable "authorized_ip_ranges" {

@@ -2,7 +2,7 @@ data "azurerm_client_config" "current" {}
 
 resource "azurerm_kubernetes_cluster" "this" {
   # checkov:skip=CKV_AZURE_232: Due to strict 4-core regional quota, we must run user workloads on the system node pool
-  # checkov:skip=CKV_AZURE_6: api_server_access_profile is intentionally omitted — see note below.
+  # checkov:skip=CKV_AZURE_6: Private cluster (private_cluster_enabled=true) satisfies API server access restriction.
 
   name                = var.cluster_name
   location            = var.location
@@ -48,12 +48,10 @@ resource "azurerm_kubernetes_cluster" "this" {
     load_balancer_sku = "standard"
   }
 
-  dynamic "ingress_application_gateway" {
-    for_each = var.enable_agic ? [1] : []
-    content {
-      gateway_id = var.appgw_gateway_id
-    }
-  }
+  # AGIC is NOT installed as a managed addon because Azure explicitly does not support
+  # the ingress-appgw addon on private AKS clusters.
+  # AGIC is installed post-provisioning via Helm from the jumpbox, pointing to the
+  # existing App Gateway (module.appgw). See: docs/agic-helm-install.md
 
   oidc_issuer_enabled       = true
   workload_identity_enabled = true
@@ -65,13 +63,6 @@ resource "azurerm_kubernetes_cluster" "this" {
   oms_agent {
     log_analytics_workspace_id = var.log_analytics_workspace_id
   }
-
-  # Note: api_server_access_profile (authorized_ip_ranges) is intentionally omitted.
-  # When AGIC addon is enabled with a pre-existing App Gateway, Azure requires the
-  # gateway's dynamic public IP to be in authorized_ip_ranges at cluster creation time.
-  # Since that IP is unknown at plan time, this creates an unresolvable circular
-  # dependency that results in a 400 Bad Request from the Azure API.
-  # Phase 2: the cluster will be made private — no public API endpoint at all.
 
   tags = var.tags
 }

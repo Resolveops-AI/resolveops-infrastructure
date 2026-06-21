@@ -64,14 +64,9 @@ module "resolveops_aks" {
   system_node_min_count      = 1
   system_node_max_count      = 2
   tags                       = var.tags
-  # private_cluster_enabled is intentionally left false (default).
-  # Azure does not support creating a private AKS cluster with the AGIC addon
-  # pointing to a pre-existing Application Gateway — this combination yields a
-  # 400 Bad Request. API access is restricted by authorized_ip_ranges instead.
-  authorized_ip_ranges = var.authorized_ip_ranges
-
-  enable_agic      = true
-  appgw_gateway_id = module.appgw.id
+  # private_cluster_enabled = true (module default — satisfies org MG Deny policy).
+  # The managed AGIC addon is NOT supported on private clusters; AGIC is installed
+  # post-provisioning via Helm from the jumpbox. See docs/agic-helm-install.md
 
   depends_on = [module.networking]
 }
@@ -143,60 +138,10 @@ resource "azurerm_role_assignment" "resolveops_kv_secrets" {
   principal_id         = module.workload_identity.principal_id
 }
 
-# Namespace in resolveops-aks where all ResolveOps services run
-resource "kubernetes_namespace_v1" "resolveops" {
-  provider = kubernetes.resolveops
-
-  metadata {
-    name = var.resolveops_namespace
-  }
-
-  depends_on = [module.resolveops_aks]
-}
-
-# Dev namespace in resolveops-aks for QuickHaul development workloads
-resource "kubernetes_namespace_v1" "quickhaul_dev" {
-  provider = kubernetes.resolveops
-
-  metadata {
-    name = var.quickhaul_dev_namespace
-  }
-
-  depends_on = [module.resolveops_aks]
-}
-
-# Prod namespace in resolveops-aks for QuickHaul production workloads
-resource "kubernetes_namespace_v1" "quickhaul_prod" {
-  provider = kubernetes.resolveops
-
-  metadata {
-    name = var.quickhaul_prod_namespace
-  }
-
-  depends_on = [module.resolveops_aks]
-}
-
-# Argo CD namespace in resolveops-aks — Argo CD is installed here by Helm
-resource "kubernetes_namespace_v1" "argocd" {
-  provider = kubernetes.resolveops
-
-  metadata {
-    name = var.argocd_namespace
-  }
-
-  depends_on = [module.resolveops_aks]
-}
-
-# Monitoring namespace in resolveops-aks — Prometheus and Grafana are installed here by Helm
-resource "kubernetes_namespace_v1" "monitoring" {
-  provider = kubernetes.resolveops
-
-  metadata {
-    name = var.monitoring_namespace
-  }
-
-  depends_on = [module.resolveops_aks]
-}
+# Kubernetes namespaces (resolveops, quickhaul-dev, quickhaul-prod, argocd, monitoring)
+# are NOT created here. The private AKS API server is unreachable from the GitHub Actions
+# runner. Namespaces are created post-provisioning via ArgoCD or from the jumpbox.
+# See docs/post-provisioning.md for the setup runbook.
 
 # Private DNS Zones
 resource "azurerm_private_dns_zone" "kv_dns" {

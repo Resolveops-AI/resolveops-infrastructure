@@ -6,10 +6,6 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "4.71.0"
     }
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = "~> 2.0"
-    }
   }
 }
 
@@ -22,13 +18,7 @@ provider "azurerm" {
   }
 }
 
-# Kubernetes provider for resolveops-aks — used to create the resolveops namespace
-provider "kubernetes" {
-  alias = "resolveops"
-
-  host                   = module.resolveops_aks.kube_config_host
-  client_certificate     = base64decode(module.resolveops_aks.kube_config_client_certificate)
-  client_key             = base64decode(module.resolveops_aks.kube_config_client_key)
-  cluster_ca_certificate = base64decode(module.resolveops_aks.kube_config_cluster_ca_certificate)
-}
-
+# Kubernetes provider removed — the AKS cluster is private (private_cluster_enabled = true)
+# and the GitHub Actions runner has no VNet access to the private API server endpoint.
+# Kubernetes namespaces and resources are managed post-provisioning via the jumpbox.
+# See docs/post-provisioning.md for the setup runbook.
