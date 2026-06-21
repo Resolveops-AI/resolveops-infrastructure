@@ -8,6 +8,7 @@ resource "azurerm_storage_account" "this" {
   min_tls_version = "TLS1_2"
 
   # Checkov Fixes
+  # checkov:skip=CKV2_AZURE_33: Private endpoint is configured in platform main.tf using a separate module.
   allow_nested_items_to_be_public = false
   public_network_access_enabled   = false
   shared_access_key_enabled       = false

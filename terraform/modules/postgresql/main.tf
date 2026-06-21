@@ -24,6 +24,7 @@ resource "azurerm_postgresql_flexible_server" "this" {
   private_dns_zone_id    = var.private_dns_zone_id
 
   # Checkov Fixes
+  # checkov:skip=CKV2_AZURE_57: Private endpoint is configured in platform main.tf using a separate module.
   geo_redundant_backup_enabled  = true
   public_network_access_enabled = false
 
