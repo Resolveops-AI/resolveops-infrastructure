@@ -7,6 +7,8 @@ resource "azurerm_kubernetes_cluster" "this" {
 
   kubernetes_version = var.kubernetes_version
 
+  automatic_upgrade_channel = "patch"
+
   local_account_disabled = true
 
   azure_policy_enabled = true
