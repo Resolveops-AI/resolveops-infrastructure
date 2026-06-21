@@ -11,6 +11,8 @@ resource "azurerm_kubernetes_cluster" "this" {
 
   automatic_upgrade_channel = "patch"
 
+  private_cluster_enabled = var.private_cluster_enabled
+
   azure_active_directory_role_based_access_control {
     azure_rbac_enabled = true
     tenant_id          = data.azurerm_client_config.current.tenant_id
@@ -48,8 +50,7 @@ resource "azurerm_kubernetes_cluster" "this" {
   dynamic "ingress_application_gateway" {
     for_each = var.enable_agic ? [1] : []
     content {
-      gateway_name = "${var.cluster_name}-appgw"
-      subnet_id    = var.appgw_subnet_id
+      gateway_id = var.appgw_gateway_id
     }
   }
 

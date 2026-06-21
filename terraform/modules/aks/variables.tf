@@ -76,6 +76,18 @@ variable "appgw_subnet_id" {
   default     = null
 }
 
+variable "private_cluster_enabled" {
+  type        = bool
+  description = "Enable private cluster"
+  default     = false
+}
+
+variable "appgw_gateway_id" {
+  type        = string
+  description = "Application Gateway ID for AGIC"
+  default     = null
+}
+
 variable "authorized_ip_ranges" {
   type        = list(string)
   description = "Authorized IP ranges for API server access"
