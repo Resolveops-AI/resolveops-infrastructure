@@ -9,6 +9,9 @@ output "vnet_name" {
 }
 
 output "subnet_ids" {
-  value       = { for k, v in azurerm_subnet.subnets : k => v.id }
+  value = merge(
+    { for k, v in azurerm_subnet.subnets : k => v.id },
+    contains(keys(var.subnets), "AzureBastionSubnet") ? { "AzureBastionSubnet" = azurerm_subnet.bastion[0].id } : {}
+  )
   description = "Map of subnet names to their IDs"
 }

@@ -7,12 +7,21 @@ resource "azurerm_virtual_network" "this" {
 }
 
 resource "azurerm_subnet" "subnets" {
-  for_each             = var.subnets
+  for_each             = { for k, v in var.subnets : k => v if k != "AzureBastionSubnet" }
   name                 = each.key
   resource_group_name  = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.this.name
   address_prefixes     = each.value.address_prefixes
   service_endpoints    = each.value.service_endpoints
+}
+
+resource "azurerm_subnet" "bastion" {
+  count                = contains(keys(var.subnets), "AzureBastionSubnet") ? 1 : 0
+  name                 = "AzureBastionSubnet"
+  resource_group_name  = var.resource_group_name
+  virtual_network_name = azurerm_virtual_network.this.name
+  address_prefixes     = var.subnets["AzureBastionSubnet"].address_prefixes
+  service_endpoints    = var.subnets["AzureBastionSubnet"].service_endpoints
 }
 
 resource "azurerm_network_security_group" "nsg" {
@@ -122,13 +131,13 @@ resource "azurerm_network_security_group" "bastion" {
 }
 
 resource "azurerm_subnet_network_security_group_association" "nsg_association" {
-  for_each                  = { for k, v in azurerm_subnet.subnets : k => v if k != "AzureBastionSubnet" }
+  for_each                  = azurerm_subnet.subnets
   subnet_id                 = each.value.id
   network_security_group_id = azurerm_network_security_group.nsg.id
 }
 
 resource "azurerm_subnet_network_security_group_association" "bastion_nsg_association" {
   count                     = contains(keys(var.subnets), "AzureBastionSubnet") ? 1 : 0
-  subnet_id                 = azurerm_subnet.subnets["AzureBastionSubnet"].id
+  subnet_id                 = azurerm_subnet.bastion[0].id
   network_security_group_id = azurerm_network_security_group.bastion[0].id
 }
