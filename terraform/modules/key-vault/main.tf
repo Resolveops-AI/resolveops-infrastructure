@@ -16,7 +16,7 @@ resource "azurerm_key_vault" "this" {
   # checkov:skip=CKV_AZURE_189: Allow public network access for GitHub Actions
   public_network_access_enabled = true
 
-  rbac_authorization_enabled    = true
+  rbac_authorization_enabled = true
 
   network_acls {
     default_action             = "Allow"
