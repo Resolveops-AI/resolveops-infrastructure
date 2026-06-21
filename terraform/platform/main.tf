@@ -377,10 +377,11 @@ module "pe_postgres" {
 
 # Store database-url in Key Vault
 resource "azurerm_key_vault_secret" "database_url" {
-  name         = "database-url"
-  value        = "postgresql://${var.postgres_admin_username}:${random_password.postgres.result}@${module.postgres.fqdn}:5432/resolveopsdb?sslmode=require"
-  key_vault_id = module.key_vault.id
-  content_type = "text/plain"
+  name            = "database-url"
+  value           = "postgresql://${var.postgres_admin_username}:${random_password.postgres.result}@${module.postgres.fqdn}:5432/resolveopsdb?sslmode=require"
+  key_vault_id    = module.key_vault.id
+  content_type    = "text/plain"
+  expiration_date = "2027-12-31T23:59:59Z"
 
   depends_on = [azurerm_role_assignment.tf_kv_secrets_officer]
 }
@@ -391,7 +392,7 @@ module "storage_account" {
   name                = var.storage_account_name
   resource_group_name = module.resource_group.name
   location            = var.location
-  replication_type    = "LRS"
+  replication_type    = "GRS"
   tags                = var.tags
 }
 
