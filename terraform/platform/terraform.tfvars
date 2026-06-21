@@ -14,7 +14,7 @@ subnets = {
 
 acr_name                     = "resolveopsacr01"
 log_analytics_workspace_name = "law-resolveops-platform"
-key_vault_name               = "resolveops-kv-01"
+key_vault_name               = "sathvik-kv-westus2-01"
 storage_account_name         = "resolveopssa01"
 
 resolveops_aks_name  = "resolveops-aks-01"
@@ -28,7 +28,7 @@ monitoring_namespace     = "monitoring"
 # Azure AI Service (ResolveOps AI)
 ai_service_name = "resolveops-ai-01"
 ai_sku_name     = "S0"
-ai_location     = "westus2"
+ai_location     = "eastus"
 
 workload_identity_name            = "id-resolveops-workload"
 workload_identity_service_account = "resolveops-workload-sa"
