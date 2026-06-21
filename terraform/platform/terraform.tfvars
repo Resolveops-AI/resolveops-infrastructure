@@ -39,3 +39,17 @@ tags = {
 }
 
 authorized_ip_ranges = ["157.51.232.45/32"]
+
+service_bus_namespace_name = "resolveops-sb-01"
+service_bus_sku            = "Standard"
+
+service_bus_queue_names = [
+  "github-sync-requested",
+  "azure-sync-requested",
+  "aws-sync-requested",
+  "resource-scan-completed",
+  "rca-requested",
+  "rca-completed",
+  "notification-requested",
+  "diagram-generation-requested"
+]

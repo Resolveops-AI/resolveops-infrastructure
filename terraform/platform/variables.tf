@@ -133,3 +133,19 @@ variable "ai_location" {
   description = "Location specifically for the Azure AI service if different from main location"
   default     = "westus2"
 }
+
+variable "service_bus_namespace_name" {
+  type        = string
+  description = "Azure Service Bus namespace name for ResolveOps async workflows."
+}
+
+variable "service_bus_sku" {
+  type        = string
+  description = "Azure Service Bus SKU."
+  default     = "Standard"
+}
+
+variable "service_bus_queue_names" {
+  type        = list(string)
+  description = "Service Bus queues used by ResolveOps AI."
+}

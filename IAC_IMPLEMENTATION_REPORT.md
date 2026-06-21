@@ -130,3 +130,14 @@ terraform/
 - **AKS**: Managed Identities (OIDC + Workload Identity). No local admin accounts, no service principal secrets.
 - **ACR**: AcrPull is granted to both AKS kubelet identities — no admin credentials needed.
 - **Secrets**: No secrets are hardcoded. All credentials flow through Workload Identity federation.
+
+## Service Bus Integration
+1. Service Bus is used for durable asynchronous workflows.
+2. RabbitMQ is for fast internal worker queues inside AKS.
+3. Service Bus is Azure-managed durable messaging.
+4. Notification service uses: "notification-requested".
+5. AI RCA flow uses: "rca-requested", "rca-completed".
+6. GitHub/Azure/AWS sync flows use: "github-sync-requested", "azure-sync-requested", "aws-sync-requested".
+7. Service Bus Standard is used for cost control.
+8. Service Bus private endpoint is not configured because Private Link requires Premium.
+9. Production recommendation: upgrade Service Bus to Premium, enable Private Endpoint, link "privatelink.servicebus.windows.net".

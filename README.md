@@ -155,3 +155,14 @@ chmod +x scripts/build-and-push-acr.sh
   1. **Self-Hosted Runner in the VNet (Recommended):** Deploy a GitHub Actions self-hosted runner on a VM inside the `vnet-resolveops-platform` Virtual Network. The runner will have private network line-of-sight to the AKS API.
   2. **GitOps via Argo CD (Implemented for QuickHaul):** Argo CD runs *inside* the private cluster and pulls changes directly from the GitHub repository. GitHub Actions only needs to update the Kubernetes manifests in the repository, and Argo CD handles the actual deployment.
   3. **Azure Bastion Jumpbox:** For manual administrative tasks and troubleshooting, use Azure Bastion to securely SSH into the internal `resolveops-jumpbox` VM. From the jumpbox, you can run `kubectl` commands against the private clusters. You can retrieve the Jumpbox SSH private key from the Terraform output: `terraform output -raw jumpbox_ssh_private_key`.
+
+## Messaging and Asynchronous Workflows
+* **Service Bus**: Used for durable asynchronous workflows. It is an Azure-managed durable messaging service.
+  * **Cost Control**: Service Bus Standard SKU is used to control costs.
+  * **Private Link**: Service Bus private endpoint is not configured because Private Link requires the Premium tier.
+  * **Production Recommendation**: For production, upgrade Service Bus to Premium, enable Private Endpoint, and link "privatelink.servicebus.windows.net".
+  * **Queues used**:
+    * Notification service: "notification-requested"
+    * AI RCA flow: "rca-requested", "rca-completed"
+    * Sync flows: "github-sync-requested", "azure-sync-requested", "aws-sync-requested"
+* **RabbitMQ**: Used for fast internal worker queues inside AKS.

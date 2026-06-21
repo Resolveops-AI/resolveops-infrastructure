@@ -84,3 +84,18 @@ output "ai_endpoint" {
   value       = module.ai.endpoint
   description = "The endpoint of the Azure AI Service"
 }
+
+output "service_bus_namespace_name" {
+  value       = module.service_bus.namespace_name
+  description = "The name of the Service Bus namespace."
+}
+
+output "service_bus_namespace_id" {
+  value       = module.service_bus.namespace_id
+  description = "The ID of the Service Bus namespace."
+}
+
+output "service_bus_queue_names" {
+  value       = var.service_bus_queue_names
+  description = "List of created Service Bus queues."
+}

@@ -323,3 +323,14 @@ module "pe_ai" {
   private_dns_zone_ids           = [azurerm_private_dns_zone.ai_dns.id]
   tags                           = var.tags
 }
+
+# Azure Service Bus for ResolveOps AI async workflows
+module "service_bus" {
+  source              = "../modules/service-bus"
+  name                = var.service_bus_namespace_name
+  location            = var.location
+  resource_group_name = module.resource_group.name
+  sku                 = var.service_bus_sku
+  queue_names         = var.service_bus_queue_names
+  tags                = var.tags
+}
