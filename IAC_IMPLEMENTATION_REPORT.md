@@ -34,6 +34,7 @@ ResolveOps AI uses **two dedicated AKS clusters**:
 | `quickhaul-aks` | `quickhaul-dev` | Terraform creates · Argo CD deploys | QuickHaul dev environment |
 | `quickhaul-aks` | `quickhaul-prod` | Terraform creates · Argo CD deploys | QuickHaul prod environment |
 | `quickhaul-aks` | `argocd` | Terraform creates · Helm bootstraps | Argo CD GitOps controller |
+| `quickhaul-aks` | `monitoring` | Terraform creates · Helm bootstraps | Prometheus and Grafana monitoring |
 
 ### Why ResolveOps Has One Namespace
 
@@ -103,7 +104,7 @@ terraform/
     kubernetes-namespaces/      # [NEW] Creates K8s namespaces — used by both envs
   environments/
     dev/   → resolveops cluster # resolveops-aks + resolveops namespace + ACR + KV
-    prod/  → quickhaul cluster  # quickhaul-aks + quickhaul-dev/prod/argocd namespaces
+    prod/  → quickhaul cluster  # quickhaul-aks + quickhaul-dev/prod/argocd/monitoring namespaces
 ```
 
 ---
@@ -134,6 +135,7 @@ terraform/
 | `quickhaul_dev_namespace` | `QUICKHAUL_DEV_NAMESPACE` | QuickHaul dev namespace |
 | `quickhaul_prod_namespace` | `QUICKHAUL_PROD_NAMESPACE` | QuickHaul prod namespace |
 | `argocd_namespace` | `ARGOCD_NAMESPACE` | Argo CD namespace |
+| `monitoring_namespace` | `MONITORING_NAMESPACE` | Monitoring namespace |
 | `tenant_id` | `AZURE_TENANT_ID` | Azure Tenant ID |
 
 ---

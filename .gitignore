@@ -1,0 +1,24 @@
+# Terraform local state and init artifacts — never commit these
+**/.terraform/
+**/.terraform.lock.hcl
+*.tfplan
+*.tfplan.json
+tfplan
+
+# Sensitive variable files and local state
+terraform.tfvars
+*.auto.tfvars
+*.tfstate*
+.terraform/
+!*.tfvars.example
+
+
+# Crash logs
+crash.log
+crash.*.log
+
+# Override files (local developer overrides)
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json

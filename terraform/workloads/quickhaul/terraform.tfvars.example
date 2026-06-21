@@ -1,0 +1,17 @@
+location = "eastus"
+
+platform_resource_group_name = "rg-resolveops-platform"
+quickhaul_aks_name           = "quickhaul-aks"
+acr_name                     = "acrresolveops123"
+
+quickhaul_dev_namespace  = "quickhaul-dev"
+quickhaul_prod_namespace = "quickhaul-prod"
+
+resource_group_name    = "rg-quickhaul"
+key_vault_name         = "kv-quickhaul-123"
+workload_identity_name = "id-quickhaul-workload"
+
+tags = {
+  Project = "quickhaul"
+  Owner   = "quickhaul-team"
+}

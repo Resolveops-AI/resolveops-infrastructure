@@ -2,6 +2,9 @@
 
 Centralized infrastructure scripts and IaC definitions for the ResolveOps AI platform and QuickHaul monitored workload.
 
+> [!WARNING]
+> The `terraform/environments/dev` and `terraform/environments/prod` directories are **deprecated** and have been superseded by the unified platform layout in `terraform/platform`. Do not use them for new deployments.
+
 ---
 
 ## Architecture
@@ -9,18 +12,18 @@ Centralized infrastructure scripts and IaC definitions for the ResolveOps AI pla
 ```
 ┌──────────────────────────────┐     monitors     ┌──────────────────────────────┐
 │       resolveops-aks         │ ───────────────▶ │        quickhaul-aks         │
-│                              │                  │                              │
-│  namespace: resolveops       │                  │  namespace: quickhaul-dev    │
-│  ┌──────────────────────┐    │                  │  namespace: quickhaul-prod   │
-│  │ frontend             │    │                  │  namespace: argocd           │
-│  │ api-gateway          │    │                  │  ┌──────────────────────┐    │
-│  │ auth-service         │    │                  │  │ QuickHaul frontend   │    │
-│  │ github-intelligence  │    │                  │  │ backend services     │    │
-│  │ azure-intelligence   │    │                  │  │ MongoDB (in-cluster) │    │
-│  │ aws-intelligence     │    │                  │  │ Redis (in-cluster)   │    │
-│  │ ai-rca-service       │    │                  │  └──────────────────────┘    │
-│  │ notification-service │    │                  │                              │
-│  └──────────────────────┘    │                  │  GitOps: Argo CD in argocd   │
+│                              │                  │  namespace: argocd           │
+│  namespace: resolveops       │                  │  namespace: monitoring       │
+│  ┌──────────────────────┐    │                  │  ┌──────────────────────┐    │
+│  │ frontend             │    │                  │  │ QuickHaul frontend   │    │
+│  │ api-gateway          │    │                  │  │ backend services     │    │
+│  │ auth-service         │    │                  │  │ MongoDB (in-cluster) │    │
+│  │ github-intelligence  │    │                  │  │ Redis (in-cluster)   │    │
+│  │ azure-intelligence   │    │                  │  └──────────────────────┘    │
+│  │ aws-intelligence     │    │                  │                              │
+│  │ ai-rca-service       │    │                  │  GitOps: Argo CD in argocd   │
+│  │ notification-service │    │                  │  Monitors: Prometheus/Grafana in monitoring │
+│  └──────────────────────┘    │                  │                              │
 └──────────────────────────────┘                  └──────────────────────────────┘
         Cluster 1                                          Cluster 2
    (ResolveOps Platform)                             (QuickHaul Workload)
@@ -49,13 +52,13 @@ terraform/
     service-bus/           # Azure Service Bus (optional)
     kubernetes-namespaces/ # [NEW] Kubernetes namespace bootstrap module
 
-  environments/
+  environments/          # [DEPRECATED] Former env structure, superseded by terraform/platform
     dev/   → resolveops-aks cluster
              - namespace: resolveops
              - ACR, Key Vault, Storage, Workload Identity owned here
 
     prod/  → quickhaul-aks cluster
-             - namespaces: quickhaul-dev, quickhaul-prod, argocd
+             - namespaces: quickhaul-dev, quickhaul-prod, argocd, monitoring
              - reads shared ACR via data source
              - Argo CD bootstrapped in argocd namespace by Helm
 ```
@@ -75,7 +78,7 @@ terraform/
 ### Cluster 2 — QuickHaul Workload (`environments/prod`)
 
 - **Cluster**: `quickhaul-aks` — Standard_B2s nodes, autoscale 1–3
-- **Namespaces**: `quickhaul-dev`, `quickhaul-prod`, `argocd`
+- **Namespaces**: `quickhaul-dev`, `quickhaul-prod`, `argocd`, `monitoring`
 - **ACR**: Shared registry — read via `data.azurerm_container_registry` (not managed here)
 - **Key Vault**: QuickHaul app secrets
 - **Workload Identity**: Federated to `quickhaul-dev` namespace
@@ -86,7 +89,7 @@ terraform/
 | Layer | Owner | Examples |
 |---|---|---|
 | Azure infrastructure | **Terraform** | AKS, ACR, VNet, Key Vault, Role Assignments |
-| Kubernetes namespaces | **Terraform** | `resolveops`, `quickhaul-dev`, `quickhaul-prod`, `argocd` |
+| Kubernetes namespaces | **Terraform** | `resolveops`, `quickhaul-dev`, `quickhaul-prod`, `argocd`, `monitoring` |
 | Platform applications | **Helm (CI/CD)** | ResolveOps microservices chart |
 | QuickHaul application | **Argo CD** | QuickHaul Helm chart, env promotion |
 | Secrets values | **Key Vault + Workload Identity** | DB connections, API keys |
@@ -110,23 +113,12 @@ chmod +x scripts/bootstrap-tfstate.sh
 ./scripts/bootstrap-tfstate.sh
 ```
 
-### 2. Deploy ResolveOps Platform Cluster
+### 2. Deploy Infrastructure Platform
 
 ```bash
-cd terraform/environments/dev
+cd terraform/platform
 cp terraform.tfvars.example terraform.tfvars
 # Edit terraform.tfvars with your values
-terraform init
-terraform plan
-terraform apply
-```
-
-### 3. Deploy QuickHaul Cluster
-
-```bash
-cd terraform/environments/prod
-cp terraform.tfvars.example terraform.tfvars
-# Edit terraform.tfvars — set acr_name and acr_resource_group_name to match step 2
 terraform init
 terraform plan
 terraform apply

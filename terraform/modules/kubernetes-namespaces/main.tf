@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.0"
+    }
+  }
+}
+
 # Creates one Kubernetes namespace per entry in var.namespaces.
 # Terraform only provisions the namespace objects; application workloads
 # are deployed by Helm / Argo CD.

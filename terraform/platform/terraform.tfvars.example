@@ -1,0 +1,21 @@
+resource_group_name = "resolveops-platform-rg-01"
+
+location = "eastus"
+
+acr_name = "resolveopsacr01"
+
+key_vault_name = "resolveops-kv-01"
+
+storage_account_name = "resolveopssa01"
+
+resolveops_aks_name = "resolveops-aks-01"
+
+quickhaul_aks_name = "quickhaul-aks-01"
+
+resolveops_namespace = "resolveops"
+
+quickhaul_dev_namespace = "quickhaul-dev"
+
+quickhaul_prod_namespace = "quickhaul-prod"
+
+authorized_ip_ranges = ["<your-public-ip>/32"]
