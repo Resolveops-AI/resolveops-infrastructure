@@ -259,17 +259,24 @@ resource "azurerm_private_dns_zone_virtual_network_link" "ai_link" {
   virtual_network_id    = module.networking.vnet_id
 }
 
-# Private Endpoints for existing resources
+# Private Endpoint for Key Vault
 module "pe_kv" {
   source                         = "../modules/private-endpoint"
   name                           = "pe-${var.key_vault_name}"
   location                       = var.location
-  resource_group_name            = module.resource_group.name
+  resource_group_name            = data.azurerm_resource_group.this.name
   subnet_id                      = module.networking.subnet_ids["snet-private-endpoints"]
   private_connection_resource_id = module.key_vault.id
   subresource_names              = ["vault"]
   private_dns_zone_ids           = [azurerm_private_dns_zone.kv_dns.id]
   tags                           = var.tags
+}
+
+# Role Assignment so Terraform can read/write secrets inside the Key Vault
+resource "azurerm_role_assignment" "tf_kv_secrets_officer" {
+  scope                = module.key_vault.id
+  role_definition_name = "Key Vault Administrator"
+  principal_id         = data.azurerm_client_config.current.object_id
 }
 
 # Azure AI Service (OpenAI)
@@ -289,6 +296,8 @@ resource "azurerm_key_vault_secret" "ai_endpoint" {
   key_vault_id    = module.key_vault.id
   content_type    = "text/plain"
   expiration_date = "2030-12-31T23:59:59Z"
+
+  depends_on = [azurerm_role_assignment.tf_kv_secrets_officer]
 }
 
 # Store AI Service Key securely in Key Vault (never outputted in plain text)
@@ -298,6 +307,8 @@ resource "azurerm_key_vault_secret" "ai_key" {
   key_vault_id    = module.key_vault.id
   content_type    = "text/plain"
   expiration_date = "2030-12-31T23:59:59Z"
+
+  depends_on = [azurerm_role_assignment.tf_kv_secrets_officer]
 }
 
 # Private Endpoint for Azure AI Service
