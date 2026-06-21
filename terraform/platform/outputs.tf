@@ -99,3 +99,18 @@ output "service_bus_queue_names" {
   value       = var.service_bus_queue_names
   description = "List of created Service Bus queues."
 }
+
+output "postgres_server_fqdn" {
+  value       = module.postgres.fqdn
+  description = "PostgreSQL Server FQDN"
+}
+
+output "postgres_database_names" {
+  value       = module.postgres.database_names
+  description = "PostgreSQL Database Names"
+}
+
+output "storage_account_name" {
+  value       = module.storage_account.name
+  description = "Storage Account Name"
+}

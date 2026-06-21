@@ -149,3 +149,27 @@ variable "service_bus_queue_names" {
   type        = list(string)
   description = "Service Bus queues used by ResolveOps AI."
 }
+
+variable "postgres_admin_username" {
+  type        = string
+  description = "PostgreSQL admin username"
+  default     = "resolveopsadmin"
+}
+
+variable "postgres_sku_name" {
+  type        = string
+  description = "PostgreSQL SKU"
+  default     = "B_Standard_B1ms"
+}
+
+variable "postgres_storage_mb" {
+  type        = number
+  description = "PostgreSQL storage in MB"
+  default     = 32768
+}
+
+variable "postgres_version" {
+  type        = string
+  description = "PostgreSQL version"
+  default     = "16"
+}

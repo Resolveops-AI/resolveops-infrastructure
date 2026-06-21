@@ -336,3 +336,99 @@ module "service_bus" {
   queue_names         = var.service_bus_queue_names
   tags                = var.tags
 }
+
+# Generate random password for PostgreSQL
+resource "random_password" "postgres" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+# Azure PostgreSQL Flexible Server
+module "postgres" {
+  source              = "../modules/postgresql"
+  name                = "resolveops-pg-01"
+  resource_group_name = module.resource_group.name
+  location            = var.location
+  admin_username      = var.postgres_admin_username
+  admin_password      = random_password.postgres.result
+  sku_name            = var.postgres_sku_name
+  storage_mb          = var.postgres_storage_mb
+  version_pg          = var.postgres_version
+  delegated_subnet_id = null
+  private_dns_zone_id = azurerm_private_dns_zone.postgres_dns.id
+  tags                = var.tags
+
+  databases = ["resolveopsdb"]
+}
+
+# Private Endpoint for PostgreSQL
+module "pe_postgres" {
+  source                         = "../modules/private-endpoint"
+  name                           = "pe-resolveops-pg"
+  location                       = var.location
+  resource_group_name            = module.resource_group.name
+  subnet_id                      = module.networking.subnet_ids["snet-private-endpoints"]
+  private_connection_resource_id = module.postgres.id
+  subresource_names              = ["postgresqlServer"]
+  private_dns_zone_ids           = [azurerm_private_dns_zone.postgres_dns.id]
+  tags                           = var.tags
+}
+
+# Store database-url in Key Vault
+resource "azurerm_key_vault_secret" "database_url" {
+  name         = "database-url"
+  value        = "postgresql://${var.postgres_admin_username}:${random_password.postgres.result}@${module.postgres.fqdn}:5432/resolveopsdb?sslmode=require"
+  key_vault_id = module.key_vault.id
+  content_type = "text/plain"
+
+  depends_on = [azurerm_role_assignment.tf_kv_secrets_officer]
+}
+
+# Storage Account
+module "storage_account" {
+  source              = "../modules/storage-account"
+  name                = var.storage_account_name
+  resource_group_name = module.resource_group.name
+  location            = var.location
+  replication_type    = "LRS"
+  tags                = var.tags
+}
+
+# Blob Containers
+resource "azurerm_storage_container" "reports" {
+  name                  = "reports"
+  storage_account_name  = module.storage_account.name
+  container_access_type = "private"
+}
+
+resource "azurerm_storage_container" "diagrams" {
+  name                  = "diagrams"
+  storage_account_name  = module.storage_account.name
+  container_access_type = "private"
+}
+
+resource "azurerm_storage_container" "logs" {
+  name                  = "logs"
+  storage_account_name  = module.storage_account.name
+  container_access_type = "private"
+}
+
+resource "azurerm_storage_container" "solutions" {
+  name                  = "solutions"
+  storage_account_name  = module.storage_account.name
+  container_access_type = "private"
+}
+
+# Private Endpoint for Blob Storage
+module "pe_blob" {
+  source                         = "../modules/private-endpoint"
+  name                           = "pe-${var.storage_account_name}-blob"
+  location                       = var.location
+  resource_group_name            = module.resource_group.name
+  subnet_id                      = module.networking.subnet_ids["snet-private-endpoints"]
+  private_connection_resource_id = module.storage_account.id
+  subresource_names              = ["blob"]
+  private_dns_zone_ids           = [azurerm_private_dns_zone.blob_dns.id]
+  tags                           = var.tags
+}
