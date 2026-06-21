@@ -97,7 +97,7 @@ variable "authorized_ip_ranges" {
 variable "user_node_vm_size" {
   type        = string
   description = "VM size for the user node pool"
-  default     = "Standard_B2s"
+  default     = "Standard_D2s_v7"
 }
 
 variable "user_node_count" {
