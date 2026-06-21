@@ -1,11 +1,6 @@
-output "resolveops_aks_name" {
+output "aks_cluster_name" {
   value       = module.resolveops_aks.name
-  description = "ResolveOps AKS cluster name"
-}
-
-output "quickhaul_aks_name" {
-  value       = module.quickhaul_aks.name
-  description = "QuickHaul AKS cluster name"
+  description = "Shared AKS cluster name"
 }
 
 output "resolveops_namespace" {
@@ -31,12 +26,12 @@ output "jumpbox_ssh_private_key" {
 
 output "argocd_namespace" {
   value       = var.argocd_namespace
-  description = "Argo CD namespace in quickhaul-aks"
+  description = "Argo CD namespace"
 }
 
 output "monitoring_namespace" {
   value       = var.monitoring_namespace
-  description = "Monitoring namespace in quickhaul-aks"
+  description = "Monitoring namespace"
 }
 
 output "acr_name" {
@@ -79,7 +74,3 @@ output "quickhaul_domain" {
   description = "QuickHaul application domain"
 }
 
-output "quickhaul_gateway_namespace" {
-  value       = "gateway-system"
-  description = "Namespace for Kong Gateway in QuickHaul AKS"
-}

@@ -7,22 +7,11 @@ two-cluster AKS architecture and explains how outputs map to GitHub Actions vari
 
 ## Architecture Overview
 
-ResolveOps AI uses **two dedicated AKS clusters**:
+ResolveOps AI uses **one shared AKS cluster** (`resolveops-aks-01`) for both the platform and the monitored workloads. 
 
-| Cluster | Name | Purpose |
-|---|---|---|
-| ResolveOps Platform | `resolveops-aks` | Hosts all ResolveOps AI microservices |
-| QuickHaul Workload | `quickhaul-aks` | Hosts QuickHaul Transits app (monitored workload) |
+### Why One Cluster?
 
-### Why Two Clusters?
-
-| Concern | Reason |
-|---|---|
-| **Blast radius isolation** | A broken ResolveOps deploy cannot take down the monitored QuickHaul cluster |
-| **Monitoring independence** | ResolveOps monitors QuickHaul cross-cluster via Azure Monitor and Prometheus remote_write |
-| **RBAC isolation** | Each cluster has its own RBAC; QuickHaul team cannot access ResolveOps secrets |
-| **GitOps clarity** | Argo CD runs in `quickhaul-aks` and manages only QuickHaul. ResolveOps CI/CD is separate |
-| **Demo cost** | Both clusters use `Standard_B2s` with min 1 node — minimal cost |
+Due to Azure quota and resource cost limitations, maintaining two separate AKS clusters is not feasible. Both the ResolveOps AI platform and QuickHaul Transits applications have been consolidated into one shared cluster. Isolation is handled purely by Kubernetes namespaces.
 
 ---
 
@@ -30,11 +19,11 @@ ResolveOps AI uses **two dedicated AKS clusters**:
 
 | Cluster | Namespace | Managed By | Purpose |
 |---|---|---|---|
-| `resolveops-aks` | `resolveops` | Terraform creates · Helm deploys | All ResolveOps AI platform services |
-| `quickhaul-aks` | `quickhaul-dev` | Terraform creates · Argo CD deploys | QuickHaul dev environment |
-| `quickhaul-aks` | `quickhaul-prod` | Terraform creates · Argo CD deploys | QuickHaul prod environment |
-| `quickhaul-aks` | `argocd` | Terraform creates · Helm bootstraps | Argo CD GitOps controller |
-| `quickhaul-aks` | `monitoring` | Terraform creates · Helm bootstraps | Prometheus and Grafana monitoring |
+| `resolveops-aks-01` | `resolveops` | Terraform creates · Helm deploys | All ResolveOps AI platform services |
+| `resolveops-aks-01` | `quickhaul-dev` | Terraform creates · Argo CD deploys | QuickHaul dev environment |
+| `resolveops-aks-01` | `quickhaul-prod` | Terraform creates · Argo CD deploys | QuickHaul prod environment |
+| `resolveops-aks-01` | `argocd` | Terraform creates · Helm bootstraps | Argo CD GitOps controller |
+| `resolveops-aks-01` | `monitoring` | Terraform creates · Helm bootstraps | Prometheus and Grafana monitoring |
 
 ### Why ResolveOps Has One Namespace
 
@@ -55,7 +44,7 @@ changes through environments with full isolation.
 - Azure Resource Groups
 - Virtual Networks and Subnets
 - Azure Container Registry (ACR) — one shared registry
-- AKS Clusters (`resolveops-aks`, `quickhaul-aks`)
+- AKS Cluster (`resolveops-aks-01`)
 - Log Analytics Workspaces
 - Key Vaults
 - Storage Accounts
@@ -92,7 +81,7 @@ ResolveOps AI monitors the QuickHaul cluster cross-cluster using:
 ```text
 terraform/
   modules/
-    aks/                        # AKS cluster — reused for both clusters
+    aks/                        # AKS cluster
     acr/                        # Azure Container Registry
     networking/                 # VNet + subnets
     key-vault/                  # Key Vault with RBAC
@@ -102,9 +91,8 @@ terraform/
     role-assignments/           # RBAC role assignments
     service-bus/                # Azure Service Bus (optional)
     kubernetes-namespaces/      # [NEW] Creates K8s namespaces — used by both envs
-  environments/
-    dev/   → resolveops cluster # resolveops-aks + resolveops namespace + ACR + KV
-    prod/  → quickhaul cluster  # quickhaul-aks + quickhaul-dev/prod/argocd/monitoring namespaces
+  platform/                     # Shared environment
+    resolveops-aks-01           # cluster + namespaces + ACR + KV
 ```
 
 ---
@@ -115,7 +103,7 @@ terraform/
 
 | Terraform Output | GitHub Variable | Description |
 |---|---|---|
-| `resolveops_aks_name` | `AKS_CLUSTER_NAME` | ResolveOps AKS cluster name |
+| `aks_cluster_name` | `AKS_CLUSTER_NAME` | Shared AKS cluster name |
 | `acr_name` | `ACR_NAME` | Shared ACR name |
 | `acr_login_server` | `ACR_LOGIN_SERVER` | Shared ACR login server URL |
 | `resource_group_name` | `AZURE_RESOURCE_GROUP` | ResolveOps resource group |
@@ -124,19 +112,14 @@ terraform/
 | `key_vault_name` | `KEY_VAULT_NAME` | ResolveOps Key Vault |
 | `tenant_id` | `AZURE_TENANT_ID` | Azure Tenant ID |
 
-### QuickHaul Environment (`terraform/environments/prod`)
+### QuickHaul Variables Mapping
 
 | Terraform Output | GitHub Variable | Description |
 |---|---|---|
-| `quickhaul_aks_name` | `QUICKHAUL_AKS_CLUSTER_NAME` | QuickHaul AKS cluster name |
-| `acr_name` | `ACR_NAME` | Shared ACR name |
-| `acr_login_server` | `ACR_LOGIN_SERVER` | Shared ACR login server URL |
-| `resource_group_name` | `QUICKHAUL_RESOURCE_GROUP` | QuickHaul resource group |
 | `quickhaul_dev_namespace` | `QUICKHAUL_DEV_NAMESPACE` | QuickHaul dev namespace |
 | `quickhaul_prod_namespace` | `QUICKHAUL_PROD_NAMESPACE` | QuickHaul prod namespace |
 | `argocd_namespace` | `ARGOCD_NAMESPACE` | Argo CD namespace |
 | `monitoring_namespace` | `MONITORING_NAMESPACE` | Monitoring namespace |
-| `tenant_id` | `AZURE_TENANT_ID` | Azure Tenant ID |
 
 ---
 

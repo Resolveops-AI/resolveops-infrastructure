@@ -26,10 +26,9 @@ variable "subnets" {
     address_prefixes  = list(string)
     service_endpoints = optional(list(string))
   }))
-  description = "Subnets map — must include 'resolveops-aks' and 'quickhaul-aks'"
+  description = "Subnets map — must include 'resolveops-aks'"
   default = {
     "resolveops-aks" = { address_prefixes = ["172.16.1.0/24"], service_endpoints = ["Microsoft.KeyVault"] }
-    "quickhaul-aks"  = { address_prefixes = ["172.16.2.0/24"], service_endpoints = ["Microsoft.KeyVault"] }
   }
 }
 
@@ -62,12 +61,7 @@ variable "resolveops_namespace" {
   default     = "resolveops"
 }
 
-# QuickHaul runs on its own cluster with dev and prod namespaces
-variable "quickhaul_aks_name" {
-  type        = string
-  description = "Name of the QuickHaul AKS cluster"
-  default     = "quickhaul-aks"
-}
+# QuickHaul now runs on the shared cluster with dev and prod namespaces
 
 variable "quickhaul_dev_namespace" {
   type        = string

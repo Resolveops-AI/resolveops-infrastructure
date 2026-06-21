@@ -32,12 +32,3 @@ provider "kubernetes" {
   cluster_ca_certificate = base64decode(module.resolveops_aks.kube_config_cluster_ca_certificate)
 }
 
-# Kubernetes provider for quickhaul-aks — used to create quickhaul-dev, quickhaul-prod, argocd namespaces
-provider "kubernetes" {
-  alias = "quickhaul"
-
-  host                   = module.quickhaul_aks.kube_config_host
-  client_certificate     = base64decode(module.quickhaul_aks.kube_config_client_certificate)
-  client_key             = base64decode(module.quickhaul_aks.kube_config_client_key)
-  cluster_ca_certificate = base64decode(module.quickhaul_aks.kube_config_cluster_ca_certificate)
-}

@@ -47,8 +47,7 @@ module "key_vault" {
   soft_delete_retention_days = 7
   tags                       = var.tags
   allowed_subnet_ids = [
-    module.networking.subnet_ids["resolveops-aks"],
-    module.networking.subnet_ids["quickhaul-aks"]
+    module.networking.subnet_ids["resolveops-aks"]
   ]
 }
 
@@ -84,24 +83,7 @@ module "appgw" {
   tags                = var.tags
 }
 
-# AKS cluster where QuickHaul dev and prod workloads run
-module "quickhaul_aks" {
-  source                     = "../modules/aks"
-  cluster_name               = var.quickhaul_aks_name
-  location                   = var.location
-  resource_group_name        = module.resource_group.name
-  dns_prefix                 = var.quickhaul_aks_name
-  vnet_subnet_id             = module.networking.subnet_ids["quickhaul-aks"]
-  log_analytics_workspace_id = module.log_analytics.id
-  system_node_vm_size        = "Standard_D2s_v7"
-  system_node_auto_scaling   = true
-  system_node_min_count      = 1
-  system_node_max_count      = 3
-  tags                       = var.tags
-  private_cluster_enabled    = true
 
-  depends_on = [module.networking]
-}
 
 # Workload Identity for ResolveOps pods to access Key Vault without secrets
 module "workload_identity" {
@@ -151,12 +133,7 @@ resource "azurerm_role_assignment" "resolveops_acr_pull" {
   principal_id         = module.resolveops_aks.kubelet_identity_object_id
 }
 
-# Allows quickhaul-aks nodes to pull images from ACR
-resource "azurerm_role_assignment" "quickhaul_acr_pull" {
-  scope                = module.acr.id
-  role_definition_name = "AcrPull"
-  principal_id         = module.quickhaul_aks.kubelet_identity_object_id
-}
+
 
 # Allows ResolveOps pods to read secrets from Key Vault via Workload Identity
 resource "azurerm_role_assignment" "resolveops_kv_secrets" {
@@ -176,59 +153,48 @@ resource "kubernetes_namespace_v1" "resolveops" {
   depends_on = [module.resolveops_aks]
 }
 
-# Dev namespace in quickhaul-aks for QuickHaul development workloads
+# Dev namespace in resolveops-aks for QuickHaul development workloads
 resource "kubernetes_namespace_v1" "quickhaul_dev" {
-  provider = kubernetes.quickhaul
+  provider = kubernetes.resolveops
 
   metadata {
     name = var.quickhaul_dev_namespace
   }
 
-  depends_on = [module.quickhaul_aks]
+  depends_on = [module.resolveops_aks]
 }
 
-# Prod namespace in quickhaul-aks for QuickHaul production workloads
+# Prod namespace in resolveops-aks for QuickHaul production workloads
 resource "kubernetes_namespace_v1" "quickhaul_prod" {
-  provider = kubernetes.quickhaul
+  provider = kubernetes.resolveops
 
   metadata {
     name = var.quickhaul_prod_namespace
   }
 
-  depends_on = [module.quickhaul_aks]
+  depends_on = [module.resolveops_aks]
 }
 
-# Argo CD namespace in quickhaul-aks — Argo CD is installed here by Helm
+# Argo CD namespace in resolveops-aks — Argo CD is installed here by Helm
 resource "kubernetes_namespace_v1" "argocd" {
-  provider = kubernetes.quickhaul
+  provider = kubernetes.resolveops
 
   metadata {
     name = var.argocd_namespace
   }
 
-  depends_on = [module.quickhaul_aks]
+  depends_on = [module.resolveops_aks]
 }
 
-# Monitoring namespace in quickhaul-aks — Prometheus and Grafana are installed here by Helm
+# Monitoring namespace in resolveops-aks — Prometheus and Grafana are installed here by Helm
 resource "kubernetes_namespace_v1" "monitoring" {
-  provider = kubernetes.quickhaul
+  provider = kubernetes.resolveops
 
   metadata {
     name = var.monitoring_namespace
   }
 
-  depends_on = [module.quickhaul_aks]
-}
-
-# Gateway API namespace in quickhaul-aks for Kong
-resource "kubernetes_namespace_v1" "gateway_system" {
-  provider = kubernetes.quickhaul
-
-  metadata {
-    name = "gateway-system"
-  }
-
-  depends_on = [module.quickhaul_aks]
+  depends_on = [module.resolveops_aks]
 }
 
 # Private DNS Zones

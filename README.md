@@ -10,23 +10,25 @@ Centralized infrastructure scripts and IaC definitions for the ResolveOps AI pla
 ## Architecture
 
 ```
-┌──────────────────────────────┐     monitors     ┌──────────────────────────────┐
-│       resolveops-aks         │ ───────────────▶ │        quickhaul-aks         │
-│                              │                  │  namespace: argocd           │
-│  namespace: resolveops       │                  │  namespace: monitoring       │
-│  ┌──────────────────────┐    │                  │  ┌──────────────────────┐    │
-│  │ frontend             │    │                  │  │ QuickHaul frontend   │    │
-│  │ api-gateway          │    │                  │  │ backend services     │    │
-│  │ auth-service         │    │                  │  │ MongoDB (in-cluster) │    │
-│  │ github-intelligence  │    │                  │  │ Redis (in-cluster)   │    │
-│  │ azure-intelligence   │    │                  │  └──────────────────────┘    │
-│  │ aws-intelligence     │    │                  │                              │
-│  │ ai-rca-service       │    │                  │  GitOps: Argo CD in argocd   │
-│  │ notification-service │    │                  │  Monitors: Prometheus/Grafana in monitoring │
-│  └──────────────────────┘    │                  │                              │
-└──────────────────────────────┘                  └──────────────────────────────┘
-        Cluster 1                                          Cluster 2
-   (ResolveOps Platform)                             (QuickHaul Workload)
+┌────────────────────────────────────────────────────────┐
+│                   resolveops-aks-01                    │
+│                                                        │
+│  namespace: resolveops                                 │
+│  ┌──────────────────────┐   namespace: quickhaul-dev   │
+│  │ frontend             │   namespace: quickhaul-prod  │
+│  │ api-gateway          │   namespace: argocd          │
+│  │ auth-service         │   namespace: monitoring      │
+│  │ github-intelligence  │   ┌──────────────────────┐   │
+│  │ azure-intelligence   │   │ QuickHaul frontend   │   │
+│  │ aws-intelligence     │   │ backend services     │   │
+│  │ ai-rca-service       │   │ MongoDB (in-cluster) │   │
+│  │ notification-service │   │ Redis (in-cluster)   │   │
+│  └──────────────────────┘   └──────────────────────┘   │
+│                                                        │
+│  Ingress: Application Gateway with AGIC                │
+│  Domains: resolveops-ai.sathvikdevops.online           │
+│           quickhaul.sathvikdevops.site                 │
+└────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -67,22 +69,17 @@ terraform/
 
 ## Infrastructure as Code (Terraform)
 
-### Cluster 1 — ResolveOps Platform (`environments/dev`)
+### Shared Cluster (`terraform/platform`)
 
-- **Cluster**: `resolveops-aks` — Standard_B2s nodes, autoscale 1–3
-- **Namespace**: `resolveops` — all ResolveOps microservices run here
-- **ACR**: Shared registry — owned and managed in this environment
-- **Key Vault**: ResolveOps platform secrets
+Due to Azure quota and resource limitations, both ResolveOps and QuickHaul applications run inside one shared AKS cluster (`resolveops-aks-01`). Isolation is achieved using Kubernetes namespaces. Ingress is handled by a single Application Gateway via AGIC.
+
+- **Cluster**: `resolveops-aks-01`
+- **Namespaces**: `resolveops`, `quickhaul-dev`, `quickhaul-prod`, `argocd`, `monitoring`
+- **ACR**: Shared registry for all applications
+- **Key Vault**: Shared key vault for platform secrets
 - **Workload Identity**: Federated to the `resolveops` namespace
-
-### Cluster 2 — QuickHaul Workload (`environments/prod`)
-
-- **Cluster**: `quickhaul-aks` — Standard_B2s nodes, autoscale 1–3
-- **Namespaces**: `quickhaul-dev`, `quickhaul-prod`, `argocd`, `monitoring`
-- **ACR**: Shared registry — read via `data.azurerm_container_registry` (not managed here)
-- **Key Vault**: QuickHaul app secrets
-- **Workload Identity**: Federated to `quickhaul-dev` namespace
-- **Argo CD**: Namespace bootstrapped by Terraform; installed by Helm
+- **Argo CD**: Installed in `argocd` namespace for GitOps
+- **Ingress**: One Application Gateway with AGIC used for both `resolveops-ai.sathvikdevops.online` and `quickhaul.sathvikdevops.site`
 
 ### Ownership Boundaries
 
