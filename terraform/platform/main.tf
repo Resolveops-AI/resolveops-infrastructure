@@ -284,16 +284,20 @@ module "ai" {
 
 # Store AI Service Endpoint in Key Vault
 resource "azurerm_key_vault_secret" "ai_endpoint" {
-  name         = "resolveops-ai-endpoint"
-  value        = module.ai.endpoint
-  key_vault_id = module.key_vault.id
+  name            = "resolveops-ai-endpoint"
+  value           = module.ai.endpoint
+  key_vault_id    = module.key_vault.id
+  content_type    = "text/plain"
+  expiration_date = "2030-12-31T23:59:59Z"
 }
 
 # Store AI Service Key securely in Key Vault (never outputted in plain text)
 resource "azurerm_key_vault_secret" "ai_key" {
-  name         = "resolveops-ai-key"
-  value        = module.ai.primary_access_key
-  key_vault_id = module.key_vault.id
+  name            = "resolveops-ai-key"
+  value           = module.ai.primary_access_key
+  key_vault_id    = module.key_vault.id
+  content_type    = "text/plain"
+  expiration_date = "2030-12-31T23:59:59Z"
 }
 
 # Private Endpoint for Azure AI Service
