@@ -23,12 +23,13 @@ variable "vnet_address_space" {
 
 variable "subnets" {
   type = map(object({
-    address_prefixes = list(string)
+    address_prefixes  = list(string)
+    service_endpoints = optional(list(string))
   }))
   description = "Subnets map — must include 'resolveops-aks' and 'quickhaul-aks'"
   default = {
-    "resolveops-aks" = { address_prefixes = ["172.16.1.0/24"] }
-    "quickhaul-aks"  = { address_prefixes = ["172.16.2.0/24"] }
+    "resolveops-aks" = { address_prefixes = ["172.16.1.0/24"], service_endpoints = ["Microsoft.KeyVault"] }
+    "quickhaul-aks"  = { address_prefixes = ["172.16.2.0/24"], service_endpoints = ["Microsoft.KeyVault"] }
   }
 }
 

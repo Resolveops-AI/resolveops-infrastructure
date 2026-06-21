@@ -61,7 +61,7 @@ module "resolveops_aks" {
   dns_prefix                 = var.resolveops_aks_name
   vnet_subnet_id             = module.networking.subnet_ids["resolveops-aks"]
   log_analytics_workspace_id = module.log_analytics.id
-  system_node_vm_size        = "Standard_B2s"
+  system_node_vm_size        = "Standard_D2s_v7"
   system_node_auto_scaling   = true
   system_node_min_count      = 1
   system_node_max_count      = 3
@@ -80,7 +80,7 @@ module "quickhaul_aks" {
   dns_prefix                 = var.quickhaul_aks_name
   vnet_subnet_id             = module.networking.subnet_ids["quickhaul-aks"]
   log_analytics_workspace_id = module.log_analytics.id
-  system_node_vm_size        = "Standard_B2s"
+  system_node_vm_size        = "Standard_D2s_v7"
   system_node_auto_scaling   = true
   system_node_min_count      = 1
   system_node_max_count      = 3
