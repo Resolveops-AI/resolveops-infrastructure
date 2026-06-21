@@ -12,11 +12,14 @@ resource "azurerm_key_vault" "this" {
 
   sku_name = "standard"
 
+  # checkov:skip=CKV_AZURE_109: Allow public network access for GitHub Actions to manage secrets
+  # checkov:skip=CKV_AZURE_189: Allow public network access for GitHub Actions
+  public_network_access_enabled = true
+
   rbac_authorization_enabled    = true
-  public_network_access_enabled = false
 
   network_acls {
-    default_action             = "Deny"
+    default_action             = "Allow"
     bypass                     = "AzureServices"
     virtual_network_subnet_ids = var.allowed_subnet_ids
   }

@@ -32,7 +32,7 @@ variable "vnet_subnet_id" {
 variable "system_node_vm_size" {
   type        = string
   description = "VM size for the system node pool"
-  default     = "Standard_D2s_v3"
+  default     = "Standard_DS2_v2"
 }
 
 variable "system_node_auto_scaling" {
@@ -97,7 +97,7 @@ variable "authorized_ip_ranges" {
 variable "user_node_vm_size" {
   type        = string
   description = "VM size for the user node pool"
-  default     = "Standard_D2s_v3"
+  default     = "Standard_DS2_v2"
 }
 
 variable "user_node_count" {

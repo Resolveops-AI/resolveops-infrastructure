@@ -60,10 +60,6 @@ resource "azurerm_kubernetes_cluster" "this" {
     secret_rotation_enabled = true
   }
 
-  oms_agent {
-    log_analytics_workspace_id = var.log_analytics_workspace_id
-  }
-
   tags = var.tags
 }
 
