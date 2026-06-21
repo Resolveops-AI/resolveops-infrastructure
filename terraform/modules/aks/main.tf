@@ -30,7 +30,6 @@ resource "azurerm_kubernetes_cluster" "this" {
     min_count                    = var.system_node_min_count
     max_count                    = var.system_node_max_count
     max_pods                     = 50
-    only_critical_addons_enabled = true
   }
 
   api_server_access_profile {
@@ -69,13 +68,3 @@ resource "azurerm_kubernetes_cluster" "this" {
   tags = var.tags
 }
 
-resource "azurerm_kubernetes_cluster_node_pool" "user" {
-
-  name                  = "user"
-  kubernetes_cluster_id = azurerm_kubernetes_cluster.this.id
-  vm_size               = var.user_node_vm_size
-  vnet_subnet_id        = var.vnet_subnet_id
-  node_count            = var.user_node_count
-  max_pods              = 50
-  tags                  = var.tags
-}
