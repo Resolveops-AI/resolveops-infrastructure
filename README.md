@@ -143,6 +143,18 @@ chmod +x scripts/build-and-push-acr.sh
 ### `scripts/deploy-to-aks.sh`
 
 ```bash
-chmod +x scripts/deploy-to-aks.sh
-./scripts/deploy-to-aks.sh
-```
+  chmod +x scripts/deploy-to-aks.sh
+  ./scripts/deploy-to-aks.sh
+  ```
+
+  ---
+
+  ## Deployment to Private AKS via GitHub Actions
+
+  Because the AKS clusters are configured as **Private Clusters** (`private_cluster_enabled = true`), the Kubernetes API server is completely isolated from the public internet. Standard GitHub Actions runners (which run on public IPs) **cannot** run `kubectl` or `helm` commands directly against the cluster.
+
+  To deploy to the private AKS clusters via GitHub Actions, you must use one of the following approaches:
+
+  1. **Self-Hosted Runner in the VNet (Recommended):** Deploy a GitHub Actions self-hosted runner on a VM inside the `vnet-resolveops-platform` Virtual Network. The runner will have private network line-of-sight to the AKS API.
+  2. **GitOps via Argo CD (Implemented for QuickHaul):** Argo CD runs *inside* the private cluster and pulls changes directly from the GitHub repository. GitHub Actions only needs to update the Kubernetes manifests in the repository, and Argo CD handles the actual deployment.
+  3. **Azure Bastion Jumpbox:** For manual administrative tasks and troubleshooting, use Azure Bastion to securely SSH into the internal `resolveops-jumpbox` VM. From the jumpbox, you can run `kubectl` commands against the private clusters. You can retrieve the Jumpbox SSH private key from the Terraform output: `terraform output -raw jumpbox_ssh_private_key`.
