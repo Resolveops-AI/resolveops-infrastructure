@@ -68,10 +68,20 @@ module "resolveops_aks" {
   tags                       = var.tags
   authorized_ip_ranges       = var.authorized_ip_ranges
 
-  enable_agic     = true
-  appgw_subnet_id = module.networking.subnet_ids["snet-appgateway"]
+  enable_agic      = true
+  appgw_gateway_id = module.appgw.id
 
   depends_on = [module.networking]
+}
+
+# Standalone Application Gateway for ResolveOps
+module "appgw" {
+  source              = "../modules/application-gateway"
+  name                = "${var.resolveops_aks_name}-appgw"
+  location            = var.location
+  resource_group_name = module.resource_group.name
+  subnet_id           = module.networking.subnet_ids["snet-appgateway"]
+  tags                = var.tags
 }
 
 # AKS cluster where QuickHaul dev and prod workloads run
