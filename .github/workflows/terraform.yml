@@ -1,15 +1,15 @@
 name: "Terraform Platform Deployment"
 
-# Triggers on pushes/PRs that modify terraform files.
-# Authentication uses branch-based OIDC — no environment gate.
-#
-# Azure Entra Federated Credential for this workflow must be configured as:
-#   Subject: repo:Resolveops-AI/resolveops-infrastructure:ref:refs/heads/main
-#
-# This means the Azure App Registration (or Managed Identity) that holds
-# AZURE_CLIENT_ID must have a federated credential matching the subject above.
-# Do NOT use environment-scoped subjects (e.g. repo:...:environment:dev) for
-# this platform workflow — branch-based OIDC is the correct approach.
+env:
+  TF_VAR_acr_name: ${{ vars.ACR_NAME }}
+  TF_VAR_location: ${{ vars.AZURE_LOCATION }}
+  TF_VAR_resolveops_aks_name: ${{ vars.RESOLVEOPS_AKS_NAME }}
+  TF_VAR_quickhaul_aks_name: ${{ vars.QUICKHAUL_AKS_NAME }}
+  TF_VAR_resolveops_namespace: ${{ vars.RESOLVEOPS_NAMESPACE }}
+  TF_VAR_quickhaul_dev_namespace: ${{ vars.QUICKHAUL_DEV_NAMESPACE }}
+  TF_VAR_quickhaul_prod_namespace: ${{ vars.QUICKHAUL_PROD_NAMESPACE }}
+  TF_VAR_authorized_ip_ranges: ${{ vars.AUTHORIZED_IP_RANGES }}
+  
 on:
   push:
     branches:
