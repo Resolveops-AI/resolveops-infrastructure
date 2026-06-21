@@ -90,3 +90,15 @@ variable "user_node_count" {
   description = "Node count for the user node pool"
   default     = 1
 }
+
+variable "service_cidr" {
+  type        = string
+  description = "CIDR range for Kubernetes services (must not overlap with VNet)"
+  default     = "10.0.0.0/16"
+}
+
+variable "dns_service_ip" {
+  type        = string
+  description = "IP address for Kubernetes DNS service (must be inside service_cidr)"
+  default     = "10.0.0.10"
+}
