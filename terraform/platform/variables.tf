@@ -1,3 +1,4 @@
+# Variable declarations for the ResolveOps platform infrastructure
 variable "location" {
   type        = string
   description = "Azure region"
