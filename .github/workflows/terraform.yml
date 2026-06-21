@@ -74,3 +74,29 @@ jobs:
           echo "- **Actor**: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Workflow**: ${{ github.workflow }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Run Link**: [Go to Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+
+  notify:
+    name: "Send Email Notification"
+    needs: terraform-platform
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Send Email
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "ResolveOps Deployment Notification - Status: ${{ needs.terraform-platform.result }}"
+          to: ${{ secrets.RECIPIENT_EMAIL }}
+          from: "ResolveOps CI/CD"
+          body: |
+            The ResolveOps platform deployment pipeline has completed.
+            
+            Result: ${{ needs.terraform-platform.result }}
+            Triggered by: ${{ github.actor }}
+            Branch: ${{ github.ref_name }}
+            Commit: ${{ github.sha }}
+            
+            Run details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
