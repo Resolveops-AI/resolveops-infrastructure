@@ -34,9 +34,6 @@ resource "azurerm_kubernetes_cluster" "this" {
     only_critical_addons_enabled = true
   }
 
-  api_server_access_profile {
-    authorized_ip_ranges = var.authorized_ip_ranges
-  }
 
   identity {
     type = "SystemAssigned"
