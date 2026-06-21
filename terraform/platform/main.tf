@@ -64,7 +64,11 @@ module "resolveops_aks" {
   system_node_min_count      = 1
   system_node_max_count      = 2
   tags                       = var.tags
-  private_cluster_enabled    = true
+  # private_cluster_enabled is intentionally left false (default).
+  # Azure does not support creating a private AKS cluster with the AGIC addon
+  # pointing to a pre-existing Application Gateway — this combination yields a
+  # 400 Bad Request. API access is restricted by authorized_ip_ranges instead.
+  authorized_ip_ranges = var.authorized_ip_ranges
 
   enable_agic      = true
   appgw_gateway_id = module.appgw.id

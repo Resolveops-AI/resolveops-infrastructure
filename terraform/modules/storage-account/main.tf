@@ -25,17 +25,22 @@ resource "azurerm_storage_account" "this" {
     }
   }
 
-  queue_properties {
-    logging {
-      delete                = true
-      read                  = true
-      write                 = true
-      version               = "1.0"
-      retention_policy_days = 7
-    }
-  }
 
   # checkov:skip=CKV2_AZURE_1: CMK is not required for this demo architecture.
 
   tags = var.tags
+}
+
+# Supersedes the deprecated queue_properties block inside azurerm_storage_account.
+# Required in azurerm 4.x; the inline block will be removed in v5.
+resource "azurerm_storage_account_queue_properties" "this" {
+  storage_account_id = azurerm_storage_account.this.id
+
+  logging {
+    delete                = true
+    read                  = true
+    write                 = true
+    version               = "1.0"
+    retention_policy_days = 7
+  }
 }

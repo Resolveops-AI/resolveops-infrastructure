@@ -32,6 +32,9 @@ resource "azurerm_kubernetes_cluster" "this" {
     max_count                    = var.system_node_max_count
     max_pods                     = 50
     only_critical_addons_enabled = true
+    # Required by azurerm 4.x when only_critical_addons_enabled = true —
+    # enables in-place node pool rotation instead of full cluster recreation.
+    temporary_name_for_rotation = "systmp"
   }
 
 
