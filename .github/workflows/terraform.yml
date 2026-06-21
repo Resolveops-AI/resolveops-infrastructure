@@ -33,22 +33,6 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      - name: Generate terraform.auto.tfvars
-        run: |
-          cat <<EOF > terraform.auto.tfvars
-          resource_group_name  = "${{ vars.RESOURCE_GROUP_NAME }}"
-          location            = "${{ vars.AZURE_LOCATION }}"
-          acr_name            = "${{ vars.ACR_NAME }}"
-          key_vault_name      = "${{ vars.KEY_VAULT_NAME }}"
-          storage_account_name = "${{ vars.PLATFORM_STORAGE_ACCOUNT_NAME }}"
-          resolveops_aks_name  = "${{ vars.RESOLVEOPS_AKS_NAME }}"
-          quickhaul_aks_name   = "${{ vars.QUICKHAUL_AKS_NAME }}"
-          resolveops_namespace = "${{ vars.RESOLVEOPS_NAMESPACE }}"
-          quickhaul_dev_namespace  = "${{ vars.QUICKHAUL_DEV_NAMESPACE }}"
-          quickhaul_prod_namespace = "${{ vars.QUICKHAUL_PROD_NAMESPACE }}"
-          authorized_ip_ranges = ${{ vars.AUTHORIZED_IP_RANGES != '' && vars.AUTHORIZED_IP_RANGES || '[]' }}
-          EOF
-
       - name: Terraform Format Check
         id: fmt
         run: terraform fmt -check -recursive ../../
@@ -72,17 +56,11 @@ jobs:
 
       - name: Terraform Plan
         id: plan
-        run: terraform plan -out=tfplan
-
-      - name: Upload Terraform Plan
-        uses: actions/upload-artifact@v4
-        with:
-          name: tfplan-platform
-          path: terraform/platform/tfplan
+        run: terraform plan -var-file="terraform.tfvars" -no-color
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
-        run: terraform apply -auto-approve tfplan
+        run: terraform apply -var-file="terraform.tfvars" -auto-approve
 
       - name: Terraform Outputs
         if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'

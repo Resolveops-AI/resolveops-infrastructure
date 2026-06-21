@@ -17,5 +17,6 @@ resolveops_namespace = "resolveops"
 quickhaul_dev_namespace = "quickhaul-dev"
 
 quickhaul_prod_namespace = "quickhaul-prod"
+monitoring_namespace = "monitoring"
 
 authorized_ip_ranges = ["<your-public-ip>/32"]
