@@ -264,7 +264,7 @@ module "pe_kv" {
   source                         = "../modules/private-endpoint"
   name                           = "pe-${var.key_vault_name}"
   location                       = var.location
-  resource_group_name            = data.azurerm_resource_group.this.name
+  resource_group_name            = module.resource_group.name
   subnet_id                      = module.networking.subnet_ids["snet-private-endpoints"]
   private_connection_resource_id = module.key_vault.id
   subresource_names              = ["vault"]
