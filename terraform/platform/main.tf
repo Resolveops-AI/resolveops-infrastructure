@@ -47,8 +47,8 @@ module "key_vault" {
   soft_delete_retention_days = 7
   tags                       = var.tags
   allowed_subnet_ids = [
-    module.networking.subnet_ids["snet-aks-resolveops"],
-    module.networking.subnet_ids["snet-aks-quickhaul"]
+    module.networking.subnet_ids["resolveops-aks"],
+    module.networking.subnet_ids["quickhaul-aks"]
   ]
 }
 
@@ -59,7 +59,7 @@ module "resolveops_aks" {
   location                   = var.location
   resource_group_name        = module.resource_group.name
   dns_prefix                 = var.resolveops_aks_name
-  vnet_subnet_id             = module.networking.subnet_ids["snet-aks-resolveops"]
+  vnet_subnet_id             = module.networking.subnet_ids["resolveops-aks"]
   log_analytics_workspace_id = module.log_analytics.id
   system_node_vm_size        = "Standard_D2s_v7"
   system_node_auto_scaling   = true
@@ -80,7 +80,7 @@ module "appgw" {
   name                = "${var.resolveops_aks_name}-appgw"
   location            = var.location
   resource_group_name = module.resource_group.name
-  subnet_id           = module.networking.subnet_ids["snet-appgateway"]
+  subnet_id           = module.networking.subnet_ids["appgw"]
   tags                = var.tags
 }
 
@@ -91,7 +91,7 @@ module "quickhaul_aks" {
   location                   = var.location
   resource_group_name        = module.resource_group.name
   dns_prefix                 = var.quickhaul_aks_name
-  vnet_subnet_id             = module.networking.subnet_ids["snet-aks-quickhaul"]
+  vnet_subnet_id             = module.networking.subnet_ids["quickhaul-aks"]
   log_analytics_workspace_id = module.log_analytics.id
   system_node_vm_size        = "Standard_D2s_v7"
   system_node_auto_scaling   = true
