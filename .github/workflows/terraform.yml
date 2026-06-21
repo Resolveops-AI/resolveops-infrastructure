@@ -1,27 +1,10 @@
 name: "Terraform Platform Deployment"
 
-env:
-  TF_VAR_acr_name: ${{ vars.ACR_NAME }}
-  TF_VAR_location: ${{ vars.AZURE_LOCATION }}
-  TF_VAR_resolveops_aks_name: ${{ vars.RESOLVEOPS_AKS_NAME }}
-  TF_VAR_quickhaul_aks_name: ${{ vars.QUICKHAUL_AKS_NAME }}
-  TF_VAR_resolveops_namespace: ${{ vars.RESOLVEOPS_NAMESPACE }}
-  TF_VAR_quickhaul_dev_namespace: ${{ vars.QUICKHAUL_DEV_NAMESPACE }}
-  TF_VAR_quickhaul_prod_namespace: ${{ vars.QUICKHAUL_PROD_NAMESPACE }}
-  TF_VAR_authorized_ip_ranges: ${{ vars.AUTHORIZED_IP_RANGES }}
-  TF_VAR_key_vault_name: ${{ vars.KEY_VAULT_NAME }}
-  TF_VAR_log_analytics_workspace_name: ${{ vars.LOG_ANALYTICS_WORKSPACE_NAME }}
-  TF_VAR_storage_account_name: ${{ vars.PLATFORM_STORAGE_ACCOUNT_NAME }}
-  
+# Triggers only on push to main branch and workflow_dispatch.
 on:
   push:
     branches:
       - main
-    paths:
-      - 'terraform/**'
-  pull_request:
-    paths:
-      - 'terraform/**'
   workflow_dispatch:
 
 permissions:
@@ -32,9 +15,6 @@ jobs:
   terraform-platform:
     name: "Terraform Platform"
     runs-on: ubuntu-latest
-    # No `environment:` key here — branch-based OIDC is used instead.
-    # Adding environment: dev would require an environment-scoped federated
-    # credential on the Azure side, which is incorrect for the platform.
     defaults:
       run:
         working-directory: terraform/platform
@@ -53,6 +33,22 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
+      - name: Generate terraform.auto.tfvars
+        run: |
+          cat <<EOF > terraform.auto.tfvars
+          resource_group_name  = "${{ vars.RESOURCE_GROUP_NAME }}"
+          location            = "${{ vars.AZURE_LOCATION }}"
+          acr_name            = "${{ vars.ACR_NAME }}"
+          key_vault_name      = "${{ vars.KEY_VAULT_NAME }}"
+          storage_account_name = "${{ vars.PLATFORM_STORAGE_ACCOUNT_NAME }}"
+          resolveops_aks_name  = "${{ vars.RESOLVEOPS_AKS_NAME }}"
+          quickhaul_aks_name   = "${{ vars.QUICKHAUL_AKS_NAME }}"
+          resolveops_namespace = "${{ vars.RESOLVEOPS_NAMESPACE }}"
+          quickhaul_dev_namespace  = "${{ vars.QUICKHAUL_DEV_NAMESPACE }}"
+          quickhaul_prod_namespace = "${{ vars.QUICKHAUL_PROD_NAMESPACE }}"
+          authorized_ip_ranges = ${{ vars.AUTHORIZED_IP_RANGES != '' && vars.AUTHORIZED_IP_RANGES || '[]' }}
+          EOF
+
       - name: Terraform Format Check
         id: fmt
         run: terraform fmt -check -recursive ../../
@@ -64,10 +60,6 @@ jobs:
       - name: Terraform Validate
         id: validate
         run: terraform validate -no-color
-
-      - name: Generate tfvars for Checkov
-        run: |
-          echo 'authorized_ip_ranges = ${{ vars.AUTHORIZED_IP_RANGES != '' && vars.AUTHORIZED_IP_RANGES || '[]' }}' > terraform.auto.tfvars
 
       - name: Checkov Static Code Analysis
         uses: bridgecrewio/checkov-action@v12

@@ -1,32 +1,21 @@
-location            = "eastus"
-resource_group_name = "rg-resolveops-platform"
+resource_group_name = "resolveops-platform-rg-01"
 
-vnet_name          = "vnet-resolveops-platform"
-vnet_address_space = ["10.0.0.0/16"]
+location = "eastus"
 
-subnets = {
-  "resolveops-aks" = { address_prefixes = ["10.0.1.0/24"] }
-  "quickhaul-aks"  = { address_prefixes = ["10.0.2.0/24"] }
-}
+acr_name = "resolveopsacr01"
 
-acr_name                     = "acrresolveops123"
-log_analytics_workspace_name = "law-resolveops-platform"
-key_vault_name               = "kv-resolveops-platform"
+key_vault_name = "resolveops-kv-01"
 
-resolveops_aks_name  = "resolveops-aks"
+storage_account_name = "resolveopssa01"
+
+resolveops_aks_name = "resolveops-aks-01"
+
+quickhaul_aks_name = "quickhaul-aks-01"
+
 resolveops_namespace = "resolveops"
 
-quickhaul_aks_name       = "quickhaul-aks"
-quickhaul_dev_namespace  = "quickhaul-dev"
+quickhaul_dev_namespace = "quickhaul-dev"
+
 quickhaul_prod_namespace = "quickhaul-prod"
-argocd_namespace         = "argocd"
 
-workload_identity_name            = "id-resolveops-workload"
-workload_identity_service_account = "resolveops-workload-sa"
-
-tags = {
-  Project = "resolveops"
-  Owner   = "platform-team"
-}
-
-authorized_ip_ranges = ["1.2.3.4/32"]
+authorized_ip_ranges = ["<your-public-ip>/32"]

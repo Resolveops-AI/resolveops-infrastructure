@@ -11,11 +11,13 @@ variable "resource_group_name" {
 variable "vnet_name" {
   type        = string
   description = "Virtual network name"
+  default     = "vnet-resolveops-platform-01"
 }
 
 variable "vnet_address_space" {
   type        = list(string)
   description = "Address space for the VNet"
+  default     = ["172.16.0.0/16"]
 }
 
 variable "subnets" {
@@ -23,6 +25,10 @@ variable "subnets" {
     address_prefixes = list(string)
   }))
   description = "Subnets map — must include 'resolveops-aks' and 'quickhaul-aks'"
+  default = {
+    "resolveops-aks" = { address_prefixes = ["172.16.1.0/24"] }
+    "quickhaul-aks"  = { address_prefixes = ["172.16.2.0/24"] }
+  }
 }
 
 variable "acr_name" {
@@ -33,6 +39,7 @@ variable "acr_name" {
 variable "log_analytics_workspace_name" {
   type        = string
   description = "Log Analytics workspace name"
+  default     = "law-resolveops-platform-01"
 }
 
 variable "key_vault_name" {
@@ -87,6 +94,13 @@ variable "monitoring_namespace" {
 variable "workload_identity_name" {
   type        = string
   description = "Managed Identity name for ResolveOps pods"
+  default     = "id-resolveops-workload-01"
+}
+
+variable "storage_account_name" {
+  type        = string
+  description = "Storage account name"
+  default     = "resolveopssa01"
 }
 
 variable "workload_identity_service_account" {

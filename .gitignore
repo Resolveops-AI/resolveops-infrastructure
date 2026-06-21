@@ -5,11 +5,13 @@
 *.tfplan.json
 tfplan
 
-# Sensitive variable files
-*.tfvars
-*.auto.tfvars
+# Sensitive variable files and local state
 terraform.tfvars
+*.auto.tfvars
+*.tfstate*
+.terraform/
 !*.tfvars.example
+
 
 # Crash logs
 crash.log
