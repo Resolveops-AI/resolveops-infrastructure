@@ -25,7 +25,7 @@ module "acr" {
   name                = var.acr_name
   resource_group_name = module.resource_group.name
   location            = var.location
-  sku                 = "Basic"
+  sku                 = "Premium"
   tags                = var.tags
 }
 
