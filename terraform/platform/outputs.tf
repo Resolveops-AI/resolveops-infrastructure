@@ -23,6 +23,12 @@ output "quickhaul_prod_namespace" {
   description = "QuickHaul prod namespace"
 }
 
+output "jumpbox_ssh_private_key" {
+  value       = tls_private_key.jumpbox_ssh.private_key_pem
+  description = "The SSH private key for the jumpbox VM"
+  sensitive   = true
+}
+
 output "argocd_namespace" {
   value       = var.argocd_namespace
   description = "Argo CD namespace in quickhaul-aks"

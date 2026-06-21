@@ -67,6 +67,7 @@ module "resolveops_aks" {
   system_node_max_count      = 3
   tags                       = var.tags
   authorized_ip_ranges       = var.authorized_ip_ranges
+  private_cluster_enabled    = true
 
   enable_agic      = true
   appgw_gateway_id = module.appgw.id
@@ -99,6 +100,7 @@ module "quickhaul_aks" {
   system_node_max_count      = 3
   tags                       = var.tags
   authorized_ip_ranges       = var.authorized_ip_ranges
+  private_cluster_enabled    = true
 
   depends_on = [module.networking]
 }
@@ -115,6 +117,33 @@ module "workload_identity" {
   tags                      = var.tags
 
   depends_on = [module.resolveops_aks]
+}
+
+# Generate SSH key for the jumpbox
+resource "tls_private_key" "jumpbox_ssh" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+# Azure Bastion Host for secure access to the VNet
+module "bastion" {
+  source              = "../modules/bastion"
+  name                = "resolveops-bastion"
+  location            = var.location
+  resource_group_name = module.resource_group.name
+  subnet_id           = module.networking.subnet_ids["AzureBastionSubnet"]
+  tags                = var.tags
+}
+
+# Ubuntu Linux Jumpbox VM for managing private AKS clusters
+module "jumpbox" {
+  source               = "../modules/jumpbox"
+  name                 = "resolveops-jumpbox"
+  location             = var.location
+  resource_group_name  = module.resource_group.name
+  subnet_id            = module.networking.subnet_ids["jumpbox"]
+  admin_ssh_public_key = tls_private_key.jumpbox_ssh.public_key_openssh
+  tags                 = var.tags
 }
 
 # Allows resolveops-aks nodes to pull images from ACR

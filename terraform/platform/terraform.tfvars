@@ -10,6 +10,7 @@ subnets = {
   "appgw"                  = { address_prefixes = ["172.16.3.0/24"] }
   "snet-private-endpoints" = { address_prefixes = ["172.16.4.0/24"] }
   "AzureBastionSubnet"     = { address_prefixes = ["172.16.5.0/24"] }
+  "jumpbox"                = { address_prefixes = ["172.16.6.0/24"] }
 }
 
 acr_name                     = "resolveopsacr01"
