@@ -23,7 +23,7 @@ resource "azurerm_network_security_group" "nsg" {
 }
 
 resource "azurerm_subnet_network_security_group_association" "nsg_association" {
-  for_each                  = var.subnets
+  for_each                  = { for k, v in var.subnets : k => v if k != "AzureBastionSubnet" }
   subnet_id                 = azurerm_subnet.subnets[each.key].id
   network_security_group_id = azurerm_network_security_group.nsg.id
 }
