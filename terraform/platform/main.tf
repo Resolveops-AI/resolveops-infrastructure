@@ -46,6 +46,10 @@ module "key_vault" {
   resource_group_name        = module.resource_group.name
   soft_delete_retention_days = 7
   tags                       = var.tags
+  allowed_subnet_ids = [
+    module.networking.subnet_ids["resolveops-aks"],
+    module.networking.subnet_ids["quickhaul-aks"]
+  ]
 }
 
 # AKS cluster where ResolveOps AI platform runs
@@ -62,6 +66,7 @@ module "resolveops_aks" {
   system_node_min_count      = 1
   system_node_max_count      = 3
   tags                       = var.tags
+  authorized_ip_ranges       = var.authorized_ip_ranges
 
   depends_on = [module.networking]
 }
@@ -80,6 +85,7 @@ module "quickhaul_aks" {
   system_node_min_count      = 1
   system_node_max_count      = 3
   tags                       = var.tags
+  authorized_ip_ranges       = var.authorized_ip_ranges
 
   depends_on = [module.networking]
 }
@@ -172,4 +178,41 @@ resource "kubernetes_namespace_v1" "monitoring" {
   }
 
   depends_on = [module.quickhaul_aks]
+}
+
+# Private DNS Zone for Key Vault Private Link
+resource "azurerm_private_dns_zone" "kv_dns" {
+  name                = "privatelink.vaultcore.azure.net"
+  resource_group_name = module.resource_group.name
+  tags                = var.tags
+}
+
+# Link Private DNS Zone to the VNet
+resource "azurerm_private_dns_zone_virtual_network_link" "kv_dns_link" {
+  name                  = "kv-dns-link"
+  resource_group_name   = module.resource_group.name
+  private_dns_zone_name = azurerm_private_dns_zone.kv_dns.name
+  virtual_network_id    = module.networking.vnet_id
+  tags                  = var.tags
+}
+
+# Private Endpoint for Key Vault
+resource "azurerm_private_endpoint" "kv_pe" {
+  name                = "pe-${var.key_vault_name}"
+  location            = var.location
+  resource_group_name = module.resource_group.name
+  subnet_id           = module.networking.subnet_ids["resolveops-aks"]
+  tags                = var.tags
+
+  private_service_connection {
+    name                           = "psc-${var.key_vault_name}"
+    private_connection_resource_id = module.key_vault.id
+    subresource_names              = ["vault"]
+    is_manual_connection           = false
+  }
+
+  private_dns_zone_group {
+    name                 = "kv-dns-group"
+    private_dns_zone_ids = [azurerm_private_dns_zone.kv_dns.id]
+  }
 }

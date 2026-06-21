@@ -18,13 +18,22 @@ resource "azurerm_kubernetes_cluster" "this" {
   # Disable local admin account for improved security
   local_account_disabled = true
 
+  # Enable Azure Policy add-on for compliance
+  azure_policy_enabled = true
+
   default_node_pool {
-    name                 = "system"
-    vm_size              = var.system_node_vm_size
-    vnet_subnet_id       = var.vnet_subnet_id
-    auto_scaling_enabled = var.system_node_auto_scaling
-    min_count            = var.system_node_min_count
-    max_count            = var.system_node_max_count
+    name                         = "system"
+    vm_size                      = var.system_node_vm_size
+    vnet_subnet_id               = var.vnet_subnet_id
+    auto_scaling_enabled         = var.system_node_auto_scaling
+    min_count                    = var.system_node_min_count
+    max_count                    = var.system_node_max_count
+    max_pods                     = 50
+    only_critical_addons_enabled = true
+  }
+
+  api_server_access_profile {
+    authorized_ip_ranges = var.authorized_ip_ranges
   }
 
   identity {
@@ -50,4 +59,16 @@ resource "azurerm_kubernetes_cluster" "this" {
   }
 
   tags = var.tags
+}
+
+resource "azurerm_kubernetes_cluster_node_pool" "user" {
+  # checkov:skip=CKV_AZURE_227: Skipped for low-cost demo deployment - host encryption is not needed for demo
+  # checkov:skip=CKV_AZURE_226: Skipped for low-cost demo deployment - ephemeral OS disks are not needed for demo
+  name                  = "user"
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.this.id
+  vm_size               = var.user_node_vm_size
+  vnet_subnet_id        = var.vnet_subnet_id
+  node_count            = var.user_node_count
+  max_pods              = 50
+  tags                  = var.tags
 }

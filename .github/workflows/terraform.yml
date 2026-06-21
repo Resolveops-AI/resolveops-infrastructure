@@ -29,6 +29,8 @@ jobs:
   terraform-platform:
     name: "Terraform Platform"
     runs-on: ubuntu-latest
+    env:
+      TF_VAR_authorized_ip_ranges: ${{ vars.AUTHORIZED_IP_RANGES != '' && vars.AUTHORIZED_IP_RANGES || '[]' }}
     # No `environment:` key here — branch-based OIDC is used instead.
     # Adding environment: dev would require an environment-scoped federated
     # credential on the Azure side, which is incorrect for the platform.

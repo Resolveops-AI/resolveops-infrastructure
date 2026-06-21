@@ -100,3 +100,9 @@ variable "tags" {
   description = "Tags to apply to all resources"
   default     = {}
 }
+
+variable "authorized_ip_ranges" {
+  type        = list(string)
+  description = "Authorized IP ranges for AKS API server access"
+  default     = []
+}

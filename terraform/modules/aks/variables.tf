@@ -63,3 +63,21 @@ variable "tags" {
   description = "Tags to apply to the AKS cluster"
   default     = {}
 }
+
+variable "authorized_ip_ranges" {
+  type        = list(string)
+  description = "Authorized IP ranges for API server access"
+  default     = []
+}
+
+variable "user_node_vm_size" {
+  type        = string
+  description = "VM size for the user node pool"
+  default     = "Standard_B2s"
+}
+
+variable "user_node_count" {
+  type        = number
+  description = "Node count for the user node pool"
+  default     = 1
+}

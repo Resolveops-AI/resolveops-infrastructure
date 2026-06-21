@@ -24,3 +24,9 @@ variable "tags" {
   description = "Tags to apply to the Key Vault"
   default     = {}
 }
+
+variable "allowed_subnet_ids" {
+  type        = list(string)
+  description = "Subnet IDs authorized to access the Key Vault"
+  default     = []
+}

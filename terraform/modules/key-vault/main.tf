@@ -11,7 +11,14 @@ resource "azurerm_key_vault" "this" {
 
   sku_name = "standard"
 
-  rbac_authorization_enabled = true
+  rbac_authorization_enabled    = true
+  public_network_access_enabled = false
+
+  network_acls {
+    default_action             = "Deny"
+    bypass                     = "AzureServices"
+    virtual_network_subnet_ids = var.allowed_subnet_ids
+  }
 
   tags = var.tags
 }
