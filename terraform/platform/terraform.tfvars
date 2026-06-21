@@ -5,8 +5,8 @@ vnet_name          = "vnet-resolveops-platform"
 vnet_address_space = ["172.16.0.0/16"]
 
 subnets = {
-  "resolveops-aks" = { address_prefixes = ["172.16.1.0/24"] }
-  "quickhaul-aks"  = { address_prefixes = ["172.16.2.0/24"] }
+  "resolveops-aks" = { address_prefixes = ["172.16.1.0/24"], service_endpoints = ["Microsoft.KeyVault"] }
+  "quickhaul-aks"  = { address_prefixes = ["172.16.2.0/24"], service_endpoints = ["Microsoft.KeyVault"] }
 }
 
 acr_name                     = "resolveopsacr01"

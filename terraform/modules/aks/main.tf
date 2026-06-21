@@ -1,3 +1,5 @@
+data "azurerm_client_config" "current" {}
+
 resource "azurerm_kubernetes_cluster" "this" {
 
   name                = var.cluster_name
@@ -8,6 +10,11 @@ resource "azurerm_kubernetes_cluster" "this" {
   kubernetes_version = var.kubernetes_version
 
   automatic_upgrade_channel = "patch"
+
+  azure_active_directory_role_based_access_control {
+    azure_rbac_enabled = true
+    tenant_id          = data.azurerm_client_config.current.tenant_id
+  }
 
   local_account_disabled = true
 
