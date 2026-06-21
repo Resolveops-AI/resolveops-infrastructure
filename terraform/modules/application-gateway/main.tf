@@ -8,6 +8,8 @@ resource "azurerm_public_ip" "appgw" {
 }
 
 resource "azurerm_application_gateway" "appgw" {
+  # checkov:skip=CKV_AZURE_218: TLS will be configured later via AGIC and cert-manager
+  # checkov:skip=CKV_AZURE_217: HTTP listener required for initial bootstrap before TLS configuration
   name                = var.name
   resource_group_name = var.resource_group_name
   location            = var.location
