@@ -25,7 +25,7 @@ module "acr" {
   name                = var.acr_name
   resource_group_name = module.resource_group.name
   location            = var.location
-  sku                 = "Premium"
+  sku                 = "Basic"
   tags                = var.tags
 }
 
@@ -278,17 +278,5 @@ module "pe_kv" {
   private_connection_resource_id = module.key_vault.id
   subresource_names              = ["vault"]
   private_dns_zone_ids           = [azurerm_private_dns_zone.kv_dns.id]
-  tags                           = var.tags
-}
-
-module "pe_acr" {
-  source                         = "../modules/private-endpoint"
-  name                           = "pe-${var.acr_name}"
-  location                       = var.location
-  resource_group_name            = module.resource_group.name
-  subnet_id                      = module.networking.subnet_ids["snet-private-endpoints"]
-  private_connection_resource_id = module.acr.id
-  subresource_names              = ["registry"]
-  private_dns_zone_ids           = [azurerm_private_dns_zone.acr_dns.id]
   tags                           = var.tags
 }
