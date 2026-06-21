@@ -37,6 +37,9 @@ jobs:
         id: fmt
         run: terraform fmt -check -recursive ../../
 
+      - name: Bootstrap Terraform State
+        run: bash ../../scripts/bootstrap-tfstate.sh Sathvik-RG stsathviktfstate tfstate westus2
+
       - name: Terraform Init
         id: init
         run: terraform init
