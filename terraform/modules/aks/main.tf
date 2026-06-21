@@ -1,6 +1,7 @@
 data "azurerm_client_config" "current" {}
 
 resource "azurerm_kubernetes_cluster" "this" {
+  # checkov:skip=CKV_AZURE_232: Due to strict 4-core regional quota, we must run user workloads on the system node pool
 
   name                = var.cluster_name
   location            = var.location
