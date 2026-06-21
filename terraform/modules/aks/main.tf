@@ -32,6 +32,9 @@ resource "azurerm_kubernetes_cluster" "this" {
     max_count                    = var.system_node_max_count
     max_pods                     = 50
     only_critical_addons_enabled = true
+    upgrade_settings {
+      max_surge = "0"
+    }
   }
 
   api_server_access_profile {
@@ -78,4 +81,8 @@ resource "azurerm_kubernetes_cluster_node_pool" "user" {
   node_count            = var.user_node_count
   max_pods              = 50
   tags                  = var.tags
+
+  upgrade_settings {
+    max_surge = "0"
+  }
 }
