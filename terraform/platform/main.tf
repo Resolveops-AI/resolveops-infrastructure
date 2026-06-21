@@ -66,7 +66,6 @@ module "resolveops_aks" {
   system_node_min_count      = 1
   system_node_max_count      = 3
   tags                       = var.tags
-  authorized_ip_ranges       = var.authorized_ip_ranges
   private_cluster_enabled    = true
 
   enable_agic      = true
@@ -99,7 +98,6 @@ module "quickhaul_aks" {
   system_node_min_count      = 1
   system_node_max_count      = 3
   tags                       = var.tags
-  authorized_ip_ranges       = var.authorized_ip_ranges
   private_cluster_enabled    = true
 
   depends_on = [module.networking]
@@ -131,7 +129,7 @@ module "bastion" {
   name                = "resolveops-bastion"
   location            = var.location
   resource_group_name = module.resource_group.name
-  subnet_id           = module.networking.subnet_ids["AzureBastionSubnet"]
+  virtual_network_id  = module.networking.vnet_id
   tags                = var.tags
 }
 
