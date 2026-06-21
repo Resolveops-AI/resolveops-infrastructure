@@ -62,3 +62,18 @@ output "azure_tenant_id" {
   value       = data.azurerm_client_config.current.tenant_id
   description = "Azure tenant ID"
 }
+
+output "resolveops_domain" {
+  value       = "resolveops-ai.sathvikdevops.online"
+  description = "ResolveOps application domain"
+}
+
+output "quickhaul_domain" {
+  value       = "quickhaul.sathvikdevops.site"
+  description = "QuickHaul application domain"
+}
+
+output "quickhaul_gateway_namespace" {
+  value       = "gateway-system"
+  description = "Namespace for Kong Gateway in QuickHaul AKS"
+}

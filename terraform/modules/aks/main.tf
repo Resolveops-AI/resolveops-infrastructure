@@ -45,6 +45,14 @@ resource "azurerm_kubernetes_cluster" "this" {
     load_balancer_sku = "standard"
   }
 
+  dynamic "ingress_application_gateway" {
+    for_each = var.enable_agic ? [1] : []
+    content {
+      gateway_name = "${var.cluster_name}-appgw"
+      subnet_id    = var.appgw_subnet_id
+    }
+  }
+
   oidc_issuer_enabled       = true
   workload_identity_enabled = true
 

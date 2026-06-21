@@ -60,8 +60,20 @@ variable "log_analytics_workspace_id" {
 
 variable "tags" {
   type        = map(string)
-  description = "Tags to apply to the AKS cluster"
+  description = "Tags to apply to the AKS resources"
   default     = {}
+}
+
+variable "enable_agic" {
+  type        = bool
+  description = "Enable Application Gateway Ingress Controller"
+  default     = false
+}
+
+variable "appgw_subnet_id" {
+  type        = string
+  description = "Subnet ID for the Application Gateway"
+  default     = null
 }
 
 variable "authorized_ip_ranges" {

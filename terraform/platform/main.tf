@@ -68,6 +68,9 @@ module "resolveops_aks" {
   tags                       = var.tags
   authorized_ip_ranges       = var.authorized_ip_ranges
 
+  enable_agic     = true
+  appgw_subnet_id = module.networking.subnet_ids["appgw"]
+
   depends_on = [module.networking]
 }
 
@@ -175,6 +178,17 @@ resource "kubernetes_namespace_v1" "monitoring" {
 
   metadata {
     name = var.monitoring_namespace
+  }
+
+  depends_on = [module.quickhaul_aks]
+}
+
+# Gateway API namespace in quickhaul-aks for Kong
+resource "kubernetes_namespace_v1" "gateway_system" {
+  provider = kubernetes.quickhaul
+
+  metadata {
+    name = "gateway-system"
   }
 
   depends_on = [module.quickhaul_aks]
