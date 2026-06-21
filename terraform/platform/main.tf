@@ -99,35 +99,6 @@ module "workload_identity" {
   depends_on = [module.resolveops_aks]
 }
 
-# Generate SSH key for the jumpbox
-resource "tls_private_key" "jumpbox_ssh" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
-
-# Azure Bastion Host for secure access to the VNet
-module "bastion" {
-  source              = "../modules/bastion"
-  name                = "resolveops-bastion"
-  location            = var.location
-  resource_group_name = module.resource_group.name
-  subnet_id           = module.networking.subnet_ids["AzureBastionSubnet"]
-  tags                = var.tags
-}
-
-# Ubuntu Linux Jumpbox VM for managing private AKS clusters
-module "jumpbox" {
-  source               = "../modules/jumpbox"
-  name                 = "resolveops-jumpbox"
-  location             = var.location
-  resource_group_name  = module.resource_group.name
-  subnet_id            = module.networking.subnet_ids["jumpbox"]
-  vm_size              = "Standard_B2s"
-  admin_ssh_public_key = tls_private_key.jumpbox_ssh.public_key_openssh
-  tags                 = var.tags
-
-  depends_on = [module.resolveops_aks]
-}
 
 
 
