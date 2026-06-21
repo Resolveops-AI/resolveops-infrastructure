@@ -141,3 +141,8 @@ resource "azurerm_subnet_network_security_group_association" "bastion_nsg_associ
   subnet_id                 = azurerm_subnet.bastion[0].id
   network_security_group_id = azurerm_network_security_group.bastion[0].id
 }
+
+moved {
+  from = azurerm_subnet.subnets["AzureBastionSubnet"]
+  to   = azurerm_subnet.bastion[0]
+}
