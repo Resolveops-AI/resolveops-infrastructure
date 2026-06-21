@@ -60,8 +60,7 @@ module "resolveops_aks" {
   dns_prefix                 = var.resolveops_aks_name
   vnet_subnet_id             = module.networking.subnet_ids["resolveops-aks"]
   log_analytics_workspace_id = module.log_analytics.id
-  system_node_vm_size        = "Standard_B2s"
-  user_node_vm_size          = "Standard_B2s"
+  system_node_vm_size        = "Standard_D2s_v7"
   system_node_auto_scaling   = true
   system_node_min_count      = 1
   system_node_max_count      = 2
@@ -126,6 +125,8 @@ module "jumpbox" {
   vm_size              = "Standard_B2s"
   admin_ssh_public_key = tls_private_key.jumpbox_ssh.public_key_openssh
   tags                 = var.tags
+
+  depends_on = [module.resolveops_aks]
 }
 
 
