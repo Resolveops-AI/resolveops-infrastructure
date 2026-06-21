@@ -9,6 +9,9 @@ env:
   TF_VAR_quickhaul_dev_namespace: ${{ vars.QUICKHAUL_DEV_NAMESPACE }}
   TF_VAR_quickhaul_prod_namespace: ${{ vars.QUICKHAUL_PROD_NAMESPACE }}
   TF_VAR_authorized_ip_ranges: ${{ vars.AUTHORIZED_IP_RANGES }}
+  TF_VAR_key_vault_name: ${{ vars.KEY_VAULT_NAME }}
+  TF_VAR_log_analytics_workspace_name: ${{ vars.LOG_ANALYTICS_WORKSPACE_NAME }}
+  TF_VAR_storage_account_name: ${{ vars.PLATFORM_STORAGE_ACCOUNT_NAME }}
   
 on:
   push:
