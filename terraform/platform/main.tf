@@ -129,7 +129,7 @@ module "bastion" {
   name                = "resolveops-bastion"
   location            = var.location
   resource_group_name = module.resource_group.name
-  virtual_network_id  = module.networking.vnet_id
+  subnet_id           = module.networking.subnet_ids["AzureBastionSubnet"]
   tags                = var.tags
 }
 

@@ -13,9 +13,9 @@ variable "resource_group_name" {
   description = "Name of the resource group"
 }
 
-variable "virtual_network_id" {
+variable "subnet_id" {
   type        = string
-  description = "ID of the Virtual Network (required for Developer SKU)"
+  description = "ID of the AzureBastionSubnet"
 }
 
 variable "tags" {
