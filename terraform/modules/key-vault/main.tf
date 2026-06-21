@@ -1,6 +1,7 @@
 data "azurerm_client_config" "current" {}
 
 resource "azurerm_key_vault" "this" {
+  # checkov:skip=CKV2_AZURE_32: Private endpoint is created in platform main.tf using private-endpoint module
   name                        = var.name
   location                    = var.location
   resource_group_name         = var.resource_group_name
