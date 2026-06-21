@@ -47,8 +47,8 @@ module "key_vault" {
   soft_delete_retention_days = 7
   tags                       = var.tags
   allowed_subnet_ids = [
-    module.networking.subnet_ids["resolveops-aks"],
-    module.networking.subnet_ids["quickhaul-aks"]
+    module.networking.subnet_ids["snet-aks-resolveops"],
+    module.networking.subnet_ids["snet-aks-quickhaul"]
   ]
 }
 
@@ -59,7 +59,7 @@ module "resolveops_aks" {
   location                   = var.location
   resource_group_name        = module.resource_group.name
   dns_prefix                 = var.resolveops_aks_name
-  vnet_subnet_id             = module.networking.subnet_ids["resolveops-aks"]
+  vnet_subnet_id             = module.networking.subnet_ids["snet-aks-resolveops"]
   log_analytics_workspace_id = module.log_analytics.id
   system_node_vm_size        = "Standard_D2s_v7"
   system_node_auto_scaling   = true
@@ -69,7 +69,7 @@ module "resolveops_aks" {
   authorized_ip_ranges       = var.authorized_ip_ranges
 
   enable_agic     = true
-  appgw_subnet_id = module.networking.subnet_ids["appgw"]
+  appgw_subnet_id = module.networking.subnet_ids["snet-appgateway"]
 
   depends_on = [module.networking]
 }
@@ -81,7 +81,7 @@ module "quickhaul_aks" {
   location                   = var.location
   resource_group_name        = module.resource_group.name
   dns_prefix                 = var.quickhaul_aks_name
-  vnet_subnet_id             = module.networking.subnet_ids["quickhaul-aks"]
+  vnet_subnet_id             = module.networking.subnet_ids["snet-aks-quickhaul"]
   log_analytics_workspace_id = module.log_analytics.id
   system_node_vm_size        = "Standard_D2s_v7"
   system_node_auto_scaling   = true
@@ -194,39 +194,91 @@ resource "kubernetes_namespace_v1" "gateway_system" {
   depends_on = [module.quickhaul_aks]
 }
 
-# Private DNS Zone for Key Vault Private Link
+# Private DNS Zones
 resource "azurerm_private_dns_zone" "kv_dns" {
   name                = "privatelink.vaultcore.azure.net"
   resource_group_name = module.resource_group.name
-  tags                = var.tags
+}
+resource "azurerm_private_dns_zone" "blob_dns" {
+  name                = "privatelink.blob.core.windows.net"
+  resource_group_name = module.resource_group.name
+}
+resource "azurerm_private_dns_zone" "postgres_dns" {
+  name                = "privatelink.postgres.database.azure.com"
+  resource_group_name = module.resource_group.name
+}
+resource "azurerm_private_dns_zone" "sb_dns" {
+  name                = "privatelink.servicebus.windows.net"
+  resource_group_name = module.resource_group.name
+}
+resource "azurerm_private_dns_zone" "acr_dns" {
+  name                = "privatelink.azurecr.io"
+  resource_group_name = module.resource_group.name
+}
+resource "azurerm_private_dns_zone" "ai_dns" {
+  name                = "privatelink.cognitiveservices.azure.com"
+  resource_group_name = module.resource_group.name
 }
 
-# Link Private DNS Zone to the VNet
-resource "azurerm_private_dns_zone_virtual_network_link" "kv_dns_link" {
-  name                  = "kv-dns-link"
+# VNet Links for DNS Zones
+resource "azurerm_private_dns_zone_virtual_network_link" "kv_link" {
+  name                  = "kv-link"
   resource_group_name   = module.resource_group.name
   private_dns_zone_name = azurerm_private_dns_zone.kv_dns.name
   virtual_network_id    = module.networking.vnet_id
-  tags                  = var.tags
+}
+resource "azurerm_private_dns_zone_virtual_network_link" "blob_link" {
+  name                  = "blob-link"
+  resource_group_name   = module.resource_group.name
+  private_dns_zone_name = azurerm_private_dns_zone.blob_dns.name
+  virtual_network_id    = module.networking.vnet_id
+}
+resource "azurerm_private_dns_zone_virtual_network_link" "postgres_link" {
+  name                  = "postgres-link"
+  resource_group_name   = module.resource_group.name
+  private_dns_zone_name = azurerm_private_dns_zone.postgres_dns.name
+  virtual_network_id    = module.networking.vnet_id
+}
+resource "azurerm_private_dns_zone_virtual_network_link" "sb_link" {
+  name                  = "sb-link"
+  resource_group_name   = module.resource_group.name
+  private_dns_zone_name = azurerm_private_dns_zone.sb_dns.name
+  virtual_network_id    = module.networking.vnet_id
+}
+resource "azurerm_private_dns_zone_virtual_network_link" "acr_link" {
+  name                  = "acr-link"
+  resource_group_name   = module.resource_group.name
+  private_dns_zone_name = azurerm_private_dns_zone.acr_dns.name
+  virtual_network_id    = module.networking.vnet_id
+}
+resource "azurerm_private_dns_zone_virtual_network_link" "ai_link" {
+  name                  = "ai-link"
+  resource_group_name   = module.resource_group.name
+  private_dns_zone_name = azurerm_private_dns_zone.ai_dns.name
+  virtual_network_id    = module.networking.vnet_id
 }
 
-# Private Endpoint for Key Vault
-resource "azurerm_private_endpoint" "kv_pe" {
-  name                = "pe-${var.key_vault_name}"
-  location            = var.location
-  resource_group_name = module.resource_group.name
-  subnet_id           = module.networking.subnet_ids["resolveops-aks"]
-  tags                = var.tags
+# Private Endpoints for existing resources
+module "pe_kv" {
+  source                         = "../modules/private-endpoint"
+  name                           = "pe-${var.key_vault_name}"
+  location                       = var.location
+  resource_group_name            = module.resource_group.name
+  subnet_id                      = module.networking.subnet_ids["snet-private-endpoints"]
+  private_connection_resource_id = module.key_vault.id
+  subresource_names              = ["vault"]
+  private_dns_zone_ids           = [azurerm_private_dns_zone.kv_dns.id]
+  tags                           = var.tags
+}
 
-  private_service_connection {
-    name                           = "psc-${var.key_vault_name}"
-    private_connection_resource_id = module.key_vault.id
-    subresource_names              = ["vault"]
-    is_manual_connection           = false
-  }
-
-  private_dns_zone_group {
-    name                 = "kv-dns-group"
-    private_dns_zone_ids = [azurerm_private_dns_zone.kv_dns.id]
-  }
+module "pe_acr" {
+  source                         = "../modules/private-endpoint"
+  name                           = "pe-${var.acr_name}"
+  location                       = var.location
+  resource_group_name            = module.resource_group.name
+  subnet_id                      = module.networking.subnet_ids["snet-private-endpoints"]
+  private_connection_resource_id = module.acr.id
+  subresource_names              = ["registry"]
+  private_dns_zone_ids           = [azurerm_private_dns_zone.acr_dns.id]
+  tags                           = var.tags
 }
