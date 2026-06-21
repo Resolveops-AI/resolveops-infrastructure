@@ -7,6 +7,8 @@ tfplan
 
 # Sensitive variable files
 *.tfvars
+*.auto.tfvars
+terraform.tfvars
 !*.tfvars.example
 
 # Crash logs

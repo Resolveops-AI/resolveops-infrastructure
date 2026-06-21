@@ -104,5 +104,5 @@ variable "tags" {
 variable "authorized_ip_ranges" {
   type        = list(string)
   description = "Authorized IP ranges for AKS API server access"
-  default     = ["1.2.3.4/32"]
+  default     = []
 }

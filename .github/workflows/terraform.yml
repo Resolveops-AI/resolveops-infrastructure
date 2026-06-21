@@ -29,8 +29,6 @@ jobs:
   terraform-platform:
     name: "Terraform Platform"
     runs-on: ubuntu-latest
-    env:
-      TF_VAR_authorized_ip_ranges: ${{ vars.AUTHORIZED_IP_RANGES != '' && vars.AUTHORIZED_IP_RANGES || '[]' }}
     # No `environment:` key here — branch-based OIDC is used instead.
     # Adding environment: dev would require an environment-scoped federated
     # credential on the Azure side, which is incorrect for the platform.
@@ -64,6 +62,10 @@ jobs:
         id: validate
         run: terraform validate -no-color
 
+      - name: Generate tfvars for Checkov
+        run: |
+          echo 'authorized_ip_ranges = ${{ vars.AUTHORIZED_IP_RANGES != '' && vars.AUTHORIZED_IP_RANGES || '[]' }}' > terraform.auto.tfvars
+
       - name: Checkov Static Code Analysis
         uses: bridgecrewio/checkov-action@v12
         with:
@@ -90,3 +92,12 @@ jobs:
       - name: Terraform Outputs
         if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
         run: terraform output
+
+      - name: Publish Status to Job Summary
+        if: always()
+        run: |
+          echo "### Terraform Platform Deployment Status" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ${{ job.status == 'success' && '✅ Success' || '❌ Failure' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Actor**: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Workflow**: ${{ github.workflow }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Run Link**: [Go to Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
