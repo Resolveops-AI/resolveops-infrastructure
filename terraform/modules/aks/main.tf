@@ -67,6 +67,11 @@ resource "azurerm_kubernetes_cluster" "this" {
     log_analytics_workspace_id = var.log_analytics_workspace_id
   }
 
+  # CKV_AZURE_6: Restrict API server access to authorized IP ranges only.
+  api_server_access_profile {
+    authorized_ip_ranges = length(var.authorized_ip_ranges) > 0 ? var.authorized_ip_ranges : null
+  }
+
   tags = var.tags
 }
 

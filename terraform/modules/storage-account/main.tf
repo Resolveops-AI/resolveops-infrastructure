@@ -9,6 +9,7 @@ resource "azurerm_storage_account" "this" {
 
   # Checkov Fixes
   # checkov:skip=CKV2_AZURE_33: Private endpoint is configured in platform main.tf using a separate module.
+  # checkov:skip=CKV_AZURE_33: Queue logging is enabled via azurerm_storage_account_queue_properties resource below (Checkov cannot correlate the two resources).
   allow_nested_items_to_be_public = false
   public_network_access_enabled   = false
   # checkov:skip=CKV2_AZURE_40: Terraform requires shared access key to manage containers.
