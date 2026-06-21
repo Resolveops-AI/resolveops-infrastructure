@@ -60,7 +60,6 @@ module "resolveops_aks" {
   dns_prefix                 = var.resolveops_aks_name
   vnet_subnet_id             = module.networking.subnet_ids["resolveops-aks"]
   log_analytics_workspace_id = module.log_analytics.id
-  system_node_vm_size        = "Standard_D2s_v3"
   system_node_auto_scaling   = true
   system_node_min_count      = 1
   system_node_max_count      = 2
@@ -289,6 +288,8 @@ module "ai" {
   tags                = var.tags
 }
 
+/*
+# Cannot create secrets via Terraform GitHub Actions runner when Key Vault public network access is disabled.
 # Store AI Service Endpoint in Key Vault
 resource "azurerm_key_vault_secret" "ai_endpoint" {
   name            = "resolveops-ai-endpoint"
@@ -310,6 +311,7 @@ resource "azurerm_key_vault_secret" "ai_key" {
 
   depends_on = [azurerm_role_assignment.tf_kv_secrets_officer]
 }
+*/
 
 # Private Endpoint for Azure AI Service
 module "pe_ai" {
