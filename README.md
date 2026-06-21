@@ -2,6 +2,9 @@
 
 Centralized infrastructure scripts and IaC definitions for the ResolveOps AI platform and QuickHaul monitored workload.
 
+> [!WARNING]
+> The `terraform/environments/dev` and `terraform/environments/prod` directories are **deprecated** and have been superseded by the unified platform layout in `terraform/platform`. Do not use them for new deployments.
+
 ---
 
 ## Architecture
@@ -110,23 +113,12 @@ chmod +x scripts/bootstrap-tfstate.sh
 ./scripts/bootstrap-tfstate.sh
 ```
 
-### 2. Deploy ResolveOps Platform Cluster
+### 2. Deploy Infrastructure Platform
 
 ```bash
-cd terraform/environments/dev
+cd terraform/platform
 cp terraform.tfvars.example terraform.tfvars
 # Edit terraform.tfvars with your values
-terraform init
-terraform plan
-terraform apply
-```
-
-### 3. Deploy QuickHaul Cluster
-
-```bash
-cd terraform/environments/prod
-cp terraform.tfvars.example terraform.tfvars
-# Edit terraform.tfvars — set acr_name and acr_resource_group_name to match step 2
 terraform init
 terraform plan
 terraform apply

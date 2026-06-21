@@ -1,4 +1,10 @@
 resource "azurerm_kubernetes_cluster" "this" {
+  # checkov:skip=CKV_AZURE_117: Skipped for low-cost demo deployment - customer-managed keys are too expensive
+  # checkov:skip=CKV_AZURE_115: Skipped for low-cost demo deployment - private cluster is not needed for demo
+  # checkov:skip=CKV_AZURE_227: Skipped for low-cost demo deployment - host encryption is not needed for demo
+  # checkov:skip=CKV_AZURE_170: Skipped for low-cost demo deployment - paid SKU (SLA) is not needed for demo
+  # checkov:skip=CKV_AZURE_226: Skipped for low-cost demo deployment - ephemeral OS disks are not needed for demo
+
   name                = var.cluster_name
   location            = var.location
   resource_group_name = var.resource_group_name
