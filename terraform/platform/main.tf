@@ -356,7 +356,7 @@ module "postgres" {
   storage_mb          = var.postgres_storage_mb
   version_pg          = var.postgres_version
   delegated_subnet_id = null
-  private_dns_zone_id = azurerm_private_dns_zone.postgres_dns.id
+  private_dns_zone_id = null
   tags                = var.tags
 
   databases = ["resolveopsdb"]
@@ -399,25 +399,25 @@ module "storage_account" {
 # Blob Containers
 resource "azurerm_storage_container" "reports" {
   name                  = "reports"
-  storage_account_name  = module.storage_account.name
+  storage_account_id    = module.storage_account.id
   container_access_type = "private"
 }
 
 resource "azurerm_storage_container" "diagrams" {
   name                  = "diagrams"
-  storage_account_name  = module.storage_account.name
+  storage_account_id    = module.storage_account.id
   container_access_type = "private"
 }
 
 resource "azurerm_storage_container" "logs" {
   name                  = "logs"
-  storage_account_name  = module.storage_account.name
+  storage_account_id    = module.storage_account.id
   container_access_type = "private"
 }
 
 resource "azurerm_storage_container" "solutions" {
   name                  = "solutions"
-  storage_account_name  = module.storage_account.name
+  storage_account_id    = module.storage_account.id
   container_access_type = "private"
 }
 

@@ -11,7 +11,8 @@ resource "azurerm_storage_account" "this" {
   # checkov:skip=CKV2_AZURE_33: Private endpoint is configured in platform main.tf using a separate module.
   allow_nested_items_to_be_public = false
   public_network_access_enabled   = false
-  shared_access_key_enabled       = false
+  # checkov:skip=CKV2_AZURE_40: Terraform requires shared access key to manage containers.
+  shared_access_key_enabled       = true
 
   sas_policy {
     expiration_period = "90.00:00:00"

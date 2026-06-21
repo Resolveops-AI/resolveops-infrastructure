@@ -32,7 +32,7 @@ variable "vnet_subnet_id" {
 variable "system_node_vm_size" {
   type        = string
   description = "VM size for the system node pool"
-  default     = "Standard_B2s"
+  default     = "Standard_D2s_v3"
 }
 
 variable "system_node_auto_scaling" {
