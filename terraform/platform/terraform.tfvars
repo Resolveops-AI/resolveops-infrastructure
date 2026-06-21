@@ -1,5 +1,5 @@
-location            = "eastus"
-resource_group_name = "resolveops-platform-rg-01"
+location            = "westus2"
+resource_group_name = "Sathvik-RG"
 
 vnet_name          = "vnet-resolveops-platform"
 vnet_address_space = ["172.16.0.0/16"]
@@ -24,6 +24,11 @@ quickhaul_dev_namespace  = "quickhaul-dev"
 quickhaul_prod_namespace = "quickhaul-prod"
 argocd_namespace         = "argocd"
 monitoring_namespace     = "monitoring"
+
+# Azure AI Service (ResolveOps AI)
+ai_service_name = "resolveops-ai-01"
+ai_sku_name     = "S0"
+ai_location     = "westus2"
 
 workload_identity_name            = "id-resolveops-workload"
 workload_identity_service_account = "resolveops-workload-sa"

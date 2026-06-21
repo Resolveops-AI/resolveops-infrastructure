@@ -116,3 +116,20 @@ variable "authorized_ip_ranges" {
   description = "Authorized IP ranges for AKS API server access"
   default     = []
 }
+
+variable "ai_service_name" {
+  type        = string
+  description = "Name of the Azure AI service"
+}
+
+variable "ai_sku_name" {
+  type        = string
+  description = "SKU for the Azure AI service"
+  default     = "S0"
+}
+
+variable "ai_location" {
+  type        = string
+  description = "Location specifically for the Azure AI service if different from main location"
+  default     = "westus2"
+}

@@ -271,3 +271,40 @@ module "pe_kv" {
   private_dns_zone_ids           = [azurerm_private_dns_zone.kv_dns.id]
   tags                           = var.tags
 }
+
+# Azure AI Service (OpenAI)
+module "ai" {
+  source              = "../modules/cognitive-services"
+  name                = var.ai_service_name
+  location            = var.ai_location
+  resource_group_name = module.resource_group.name
+  sku_name            = var.ai_sku_name
+  tags                = var.tags
+}
+
+# Store AI Service Endpoint in Key Vault
+resource "azurerm_key_vault_secret" "ai_endpoint" {
+  name         = "resolveops-ai-endpoint"
+  value        = module.ai.endpoint
+  key_vault_id = module.key_vault.id
+}
+
+# Store AI Service Key securely in Key Vault (never outputted in plain text)
+resource "azurerm_key_vault_secret" "ai_key" {
+  name         = "resolveops-ai-key"
+  value        = module.ai.primary_access_key
+  key_vault_id = module.key_vault.id
+}
+
+# Private Endpoint for Azure AI Service
+module "pe_ai" {
+  source                         = "../modules/private-endpoint"
+  name                           = "pe-${var.ai_service_name}"
+  location                       = var.location
+  resource_group_name            = module.resource_group.name
+  subnet_id                      = module.networking.subnet_ids["snet-private-endpoints"]
+  private_connection_resource_id = module.ai.id
+  subresource_names              = ["account"]
+  private_dns_zone_ids           = [azurerm_private_dns_zone.ai_dns.id]
+  tags                           = var.tags
+}

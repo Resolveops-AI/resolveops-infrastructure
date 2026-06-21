@@ -75,3 +75,12 @@ output "quickhaul_domain" {
   description = "QuickHaul application domain"
 }
 
+output "ai_service_name" {
+  value       = module.ai.name
+  description = "The name of the Azure AI Service"
+}
+
+output "ai_endpoint" {
+  value       = module.ai.endpoint
+  description = "The endpoint of the Azure AI Service"
+}
