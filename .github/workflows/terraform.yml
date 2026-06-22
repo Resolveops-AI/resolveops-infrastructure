@@ -12,10 +12,10 @@ permissions:
   contents: read
 
 env:
-  TF_STATE_RESOURCE_GROUP: "sathvik-rg"
-  TF_STATE_STORAGE_ACCOUNT: "stsathviktfstate01"
-  TF_STATE_CONTAINER: "tfstate"
-  TF_STATE_KEY: "resolveops-platform-dev.tfstate"
+  TF_STATE_RESOURCE_GROUP: ${{ vars.TF_STATE_RESOURCE_GROUP }}
+  TF_STATE_STORAGE_ACCOUNT: ${{ vars.TF_STATE_STORAGE_ACCOUNT }}
+  TF_STATE_CONTAINER: ${{ vars.TF_STATE_CONTAINER }}
+  TF_STATE_KEY: ${{ vars.TF_STATE_KEY }}
 
 jobs:
   terraform-platform:
