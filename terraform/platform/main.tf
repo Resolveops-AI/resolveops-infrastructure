@@ -223,6 +223,12 @@ resource "azurerm_role_assignment" "tf_kv_secrets_officer" {
   principal_id         = data.azurerm_client_config.current.object_id
 }
 
+# Azure RBAC is eventually consistent — wait for the role assignment to propagate
+resource "time_sleep" "wait_for_kv_rbac" {
+  depends_on      = [azurerm_role_assignment.tf_kv_secrets_officer]
+  create_duration = "60s"
+}
+
 # Azure AI Service (OpenAI)
 module "ai" {
   source              = "../modules/cognitive-services"
@@ -243,7 +249,7 @@ resource "azurerm_key_vault_secret" "ai_endpoint" {
   content_type    = "text/plain"
   expiration_date = "2030-12-31T23:59:59Z"
 
-  depends_on = [azurerm_role_assignment.tf_kv_secrets_officer]
+  depends_on = [time_sleep.wait_for_kv_rbac]
 }
 
 # Store AI Service Key securely in Key Vault (never outputted in plain text)
@@ -254,7 +260,7 @@ resource "azurerm_key_vault_secret" "ai_key" {
   content_type    = "text/plain"
   expiration_date = "2030-12-31T23:59:59Z"
 
-  depends_on = [azurerm_role_assignment.tf_kv_secrets_officer]
+  depends_on = [time_sleep.wait_for_kv_rbac]
 }
 */
 
@@ -328,7 +334,7 @@ resource "azurerm_key_vault_secret" "database_url" {
   content_type    = "text/plain"
   expiration_date = "2027-12-31T23:59:59Z"
 
-  depends_on = [azurerm_role_assignment.tf_kv_secrets_officer]
+  depends_on = [time_sleep.wait_for_kv_rbac]
 }
 
 # Storage Account
