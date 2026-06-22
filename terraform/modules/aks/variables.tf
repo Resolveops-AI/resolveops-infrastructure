@@ -42,6 +42,11 @@ variable "private_cluster_enabled" {
   default     = true
 }
 
+variable "log_analytics_workspace_id" {
+  type        = string
+  description = "Log Analytics workspace ID for AKS monitoring"
+}
+
 variable "tags" {
   type        = map(string)
   description = "Tags to apply to the AKS resources"

@@ -41,15 +41,16 @@ module "log_analytics" {
 
 # Cluster 2: quickhaul-aks — hosts the QuickHaul Transits workload application.
 module "aks" {
-  source                  = "../../modules/aks"
-  cluster_name            = var.quickhaul_aks_name
-  location                = var.location
-  resource_group_name     = module.resource_group.name
-  vnet_subnet_id          = module.networking.subnet_ids["aks"]
-  private_cluster_enabled = true
-  node_vm_size            = "Standard_B2ps_v2"
-  node_count              = 2
-  tags                    = local.tags
+  source                     = "../../modules/aks"
+  cluster_name               = var.quickhaul_aks_name
+  location                   = var.location
+  resource_group_name        = module.resource_group.name
+  vnet_subnet_id             = module.networking.subnet_ids["aks"]
+  private_cluster_enabled    = true
+  log_analytics_workspace_id = module.log_analytics.id
+  node_vm_size               = "Standard_B2ps_v2"
+  node_count                 = 2
+  tags                       = local.tags
 
   depends_on = [
     module.networking

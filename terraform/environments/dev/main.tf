@@ -42,15 +42,16 @@ module "log_analytics" {
 
 # AKS cluster — hosts ResolveOps + QuickHaul workloads
 module "aks" {
-  source                  = "../../modules/aks"
-  cluster_name            = var.resolveops_aks_name
-  location                = var.location
-  resource_group_name     = module.resource_group.name
-  vnet_subnet_id          = module.networking.subnet_ids["aks"]
-  private_cluster_enabled = var.enable_private_aks
-  node_vm_size            = "Standard_B2ps_v2"
-  node_count              = 2
-  tags                    = local.tags
+  source                     = "../../modules/aks"
+  cluster_name               = var.resolveops_aks_name
+  location                   = var.location
+  resource_group_name        = module.resource_group.name
+  vnet_subnet_id             = module.networking.subnet_ids["aks"]
+  private_cluster_enabled    = var.enable_private_aks
+  log_analytics_workspace_id = module.log_analytics.id
+  node_vm_size               = "Standard_B2ps_v2"
+  node_count                 = 2
+  tags                       = local.tags
 
   depends_on = [
     module.networking
