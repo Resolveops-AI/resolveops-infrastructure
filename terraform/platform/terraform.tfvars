@@ -28,7 +28,7 @@ monitoring_namespace     = "monitoring"
 # Azure AI Service (ResolveOps AI)
 ai_service_name = "resolveops-ai-04"
 ai_sku_name     = "S0"
-ai_location     = "southindia"
+ai_location     = "eastus"
 
 workload_identity_name            = "id-resolveops-workload"
 workload_identity_service_account = "resolveops-workload-sa"
@@ -62,7 +62,7 @@ resolveops_aks_local_account_disabled = true
 system_node_vm_size      = "Standard_D4s_v3"
 system_node_min_count    = 2
 system_node_max_count    = 3
-user_node_vm_size        = "Standard_DS3_v2"
+user_node_vm_size        = "Standard_D4s_v3"
 user_node_min_count      = 1
 user_node_max_count      = 3
 enable_system_pool_taint = false
