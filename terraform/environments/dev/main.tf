@@ -40,21 +40,17 @@ module "log_analytics" {
   tags                = local.tags
 }
 
-# Cluster 1: resolveops-aks — hosts the ResolveOps AI platform microservices.
-# One cluster, one namespace (resolveops). No dev/prod split needed for the platform itself.
+# AKS cluster — hosts ResolveOps + QuickHaul workloads
 module "aks" {
-  source                     = "../../modules/aks"
-  cluster_name               = var.resolveops_aks_name
-  location                   = var.location
-  resource_group_name        = module.resource_group.name
-  dns_prefix                 = "${var.resolveops_aks_name}-dns"
-  vnet_subnet_id             = module.networking.subnet_ids["aks"]
-  log_analytics_workspace_id = module.log_analytics.id
-  system_node_vm_size        = "Standard_B2s" # Cost-conscious demo size
-  system_node_auto_scaling   = true
-  system_node_min_count      = 1
-  system_node_max_count      = 3
-  tags                       = local.tags
+  source                  = "../../modules/aks"
+  cluster_name            = var.resolveops_aks_name
+  location                = var.location
+  resource_group_name     = module.resource_group.name
+  vnet_subnet_id          = module.networking.subnet_ids["aks"]
+  private_cluster_enabled = var.enable_private_aks
+  node_vm_size            = "Standard_B2ps_v2"
+  node_count              = 2
+  tags                    = local.tags
 
   depends_on = [
     module.networking
@@ -115,7 +111,6 @@ module "role_assignments" {
 
 module "service_bus" {
   source              = "../../modules/service-bus"
-  enabled             = var.enable_service_bus
   name                = "${var.project_name}-sb-${var.environment}"
   location            = var.location
   resource_group_name = module.resource_group.name
@@ -129,6 +124,8 @@ module "resolveops_namespaces" {
 
   namespaces = [
     var.resolveops_namespace,
+    "quickhaul-dev",
+    "quickhaul-prod",
   ]
 
   labels = {

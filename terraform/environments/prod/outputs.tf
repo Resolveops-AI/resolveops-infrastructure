@@ -72,8 +72,3 @@ output "tenant_id" {
   value       = data.azurerm_client_config.current.tenant_id
   description = "Azure Tenant ID"
 }
-
-output "oidc_issuer_url" {
-  value       = module.aks.oidc_issuer_url
-  description = "QuickHaul AKS OIDC Issuer URL"
-}

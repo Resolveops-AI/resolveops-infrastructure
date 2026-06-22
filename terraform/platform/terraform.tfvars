@@ -53,3 +53,6 @@ service_bus_queue_names = [
   "notification-requested",
   "diagram-generation-requested"
 ]
+
+resolveops_aks_admin_group_object_ids = ["1b351c30-6447-44b5-9ff1-9297cb7aaf9f"]
+resolveops_aks_local_account_disabled = true

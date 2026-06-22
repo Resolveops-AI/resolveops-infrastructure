@@ -68,6 +68,9 @@ module "resolveops_aks" {
   # The managed AGIC addon is NOT supported on private clusters; AGIC is installed
   # post-provisioning via Helm from the jumpbox. See docs/agic-helm-install.md
 
+  admin_group_object_ids = var.resolveops_aks_admin_group_object_ids
+  local_account_disabled = var.resolveops_aks_local_account_disabled
+
   depends_on = [module.networking]
 }
 

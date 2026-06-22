@@ -40,20 +40,16 @@ module "log_analytics" {
 }
 
 # Cluster 2: quickhaul-aks — hosts the QuickHaul Transits workload application.
-# Two namespaces (quickhaul-dev, quickhaul-prod) managed by Argo CD for GitOps env separation.
 module "aks" {
-  source                     = "../../modules/aks"
-  cluster_name               = var.quickhaul_aks_name
-  location                   = var.location
-  resource_group_name        = module.resource_group.name
-  dns_prefix                 = "${var.quickhaul_aks_name}-dns"
-  vnet_subnet_id             = module.networking.subnet_ids["aks"]
-  log_analytics_workspace_id = module.log_analytics.id
-  system_node_vm_size        = "Standard_B2s" # Cost-conscious for demo
-  system_node_auto_scaling   = true
-  system_node_min_count      = 1
-  system_node_max_count      = 3
-  tags                       = local.tags
+  source                  = "../../modules/aks"
+  cluster_name            = var.quickhaul_aks_name
+  location                = var.location
+  resource_group_name     = module.resource_group.name
+  vnet_subnet_id          = module.networking.subnet_ids["aks"]
+  private_cluster_enabled = true
+  node_vm_size            = "Standard_B2ps_v2"
+  node_count              = 2
+  tags                    = local.tags
 
   depends_on = [
     module.networking
@@ -124,7 +120,7 @@ module "role_assignments" {
 
 module "service_bus" {
   source              = "../../modules/service-bus"
-  enabled             = var.enable_service_bus
+  # enabled             = var.enable_service_bus
   name                = "${var.project_name}-sb-${var.environment}"
   location            = var.location
   resource_group_name = module.resource_group.name

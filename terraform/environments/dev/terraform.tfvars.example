@@ -1,8 +1,8 @@
 project_name                 = "resolveops"
 environment                  = "resolveops"
-location                     = "eastus"
+location                     = "westus2"
 owner                        = "admin"
-resource_group_name          = "rg-resolveops-platform"
+resource_group_name          = "Sathvik RG dev"
 vnet_name                    = "vnet-resolveops"
 vnet_address_space           = ["10.0.0.0/16"]
 
@@ -28,7 +28,7 @@ resolveops_namespace              = "resolveops"
 workload_identity_service_account = "resolveops-workload-identity-sa"
 
 enable_service_bus       = false
-enable_private_aks       = false
+enable_private_aks       = true
 enable_private_endpoints = false
 enable_app_gateway       = false
 

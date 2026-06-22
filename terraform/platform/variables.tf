@@ -173,3 +173,16 @@ variable "postgres_version" {
   description = "PostgreSQL version"
   default     = "16"
 }
+
+variable "resolveops_aks_admin_group_object_ids" {
+  type        = list(string)
+  description = "AAD admin group object IDs for the ResolveOps AKS cluster"
+  default     = []
+}
+
+variable "resolveops_aks_local_account_disabled" {
+  type        = bool
+  description = "Disable local accounts for the ResolveOps AKS cluster"
+  default     = false
+}
+

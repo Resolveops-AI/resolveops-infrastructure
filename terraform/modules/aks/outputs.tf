@@ -15,12 +15,7 @@ output "kubelet_identity_object_id" {
 
 output "oidc_issuer_url" {
   value       = azurerm_kubernetes_cluster.this.oidc_issuer_url
-  description = "The OIDC issuer URL for the AKS cluster"
-}
-
-output "node_resource_group" {
-  value       = azurerm_kubernetes_cluster.this.node_resource_group
-  description = "The auto-generated Resource Group which contains the resources for this Managed Kubernetes Cluster."
+  description = "The OIDC issuer URL for workload identity federation"
 }
 
 output "kube_config_host" {
@@ -31,18 +26,18 @@ output "kube_config_host" {
 
 output "kube_config_client_certificate" {
   value       = azurerm_kubernetes_cluster.this.kube_config[0].client_certificate
-  description = "Base64 encoded client certificate for the AKS cluster."
+  description = "Base64 encoded client certificate."
   sensitive   = true
 }
 
 output "kube_config_client_key" {
   value       = azurerm_kubernetes_cluster.this.kube_config[0].client_key
-  description = "Base64 encoded client key for the AKS cluster."
+  description = "Base64 encoded client key."
   sensitive   = true
 }
 
 output "kube_config_cluster_ca_certificate" {
   value       = azurerm_kubernetes_cluster.this.kube_config[0].cluster_ca_certificate
-  description = "Base64 encoded cluster CA certificate for the AKS cluster."
+  description = "Base64 encoded cluster CA certificate."
   sensitive   = true
 }
