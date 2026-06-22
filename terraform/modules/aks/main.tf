@@ -53,6 +53,7 @@ resource "azurerm_kubernetes_cluster" "this" {
 }
 
 resource "azurerm_kubernetes_cluster_node_pool" "userpool" {
+  # checkov:skip=CKV_AZURE_168: Max pods kept at 30 due to node size and subnet size constraints
   name                  = "userpool"
   kubernetes_cluster_id = azurerm_kubernetes_cluster.this.id
   vm_size               = var.user_node_vm_size
