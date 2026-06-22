@@ -1,4 +1,4 @@
-location            = "centralus"
+location            = "centralindia"
 resource_group_name = "sathvik-rg"
 
 vnet_name          = "resolveops-vnet"
@@ -28,7 +28,7 @@ monitoring_namespace     = "monitoring"
 # Azure AI Service (ResolveOps AI)
 ai_service_name = "resolveops-ai-02"
 ai_sku_name     = "S0"
-ai_location     = "centralus"
+ai_location     = "centralindia"
 
 workload_identity_name            = "id-resolveops-workload"
 workload_identity_service_account = "resolveops-workload-sa"
