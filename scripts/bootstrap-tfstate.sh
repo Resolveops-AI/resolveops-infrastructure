@@ -2,8 +2,8 @@
 set -e
 
 # Load or set variables
-RESOURCE_GROUP_NAME=${1:-"rg-resolveops-tfstate"}
-STORAGE_ACCOUNT_NAME=${2:-"stresolveopstfstate01"}
+RESOURCE_GROUP_NAME=${1:-"resolveops-tfstate-rg"}
+STORAGE_ACCOUNT_NAME=${2:-"resolveopstfstate01"}
 CONTAINER_NAME=${3:-"tfstate"}
 LOCATION=${4:-"centralindia"}
 
