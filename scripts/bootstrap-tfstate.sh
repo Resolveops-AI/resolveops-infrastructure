@@ -3,9 +3,9 @@ set -e
 
 # Load or set variables
 RESOURCE_GROUP_NAME=${1:-"rg-resolveops-tfstate"}
-STORAGE_ACCOUNT_NAME=${2:-"stresolveopstfstate"}
+STORAGE_ACCOUNT_NAME=${2:-"stresolveopstfstate01"}
 CONTAINER_NAME=${3:-"tfstate"}
-LOCATION=${4:-"eastus"}
+LOCATION=${4:-"centralindia"}
 
 echo "Bootstrapping Terraform backend..."
 

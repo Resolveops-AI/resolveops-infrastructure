@@ -11,6 +11,12 @@ permissions:
   id-token: write
   contents: read
 
+env:
+  TF_STATE_RESOURCE_GROUP: "sathvik-rg"
+  TF_STATE_STORAGE_ACCOUNT: "stsathviktfstate01"
+  TF_STATE_CONTAINER: "tfstate"
+  TF_STATE_KEY: "resolveops-platform-dev.tfstate"
+
 jobs:
   terraform-platform:
     name: "Terraform Platform"
@@ -38,7 +44,7 @@ jobs:
         run: terraform fmt -check -recursive ../../
 
       - name: Bootstrap Terraform State
-        run: bash ../../scripts/bootstrap-tfstate.sh Sathvik-RG stsathviktfstate tfstate westus2
+        run: bash ../../scripts/bootstrap-tfstate.sh ${{ env.TF_STATE_RESOURCE_GROUP }} ${{ env.TF_STATE_STORAGE_ACCOUNT }} ${{ env.TF_STATE_CONTAINER }} westus2
 
       - name: Terraform Init
         id: init
