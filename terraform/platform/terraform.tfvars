@@ -62,7 +62,7 @@ resolveops_aks_local_account_disabled = true
 system_node_vm_size      = "Standard_D4s_v3"
 system_node_min_count    = 2
 system_node_max_count    = 3
-user_node_vm_size        = "Standard_D4s_v3"
+user_node_vm_size        = "Standard_D4ds_v4"
 user_node_min_count      = 1
 user_node_max_count      = 3
 enable_system_pool_taint = false
@@ -74,7 +74,7 @@ ai_deployments = {
     model = {
       format  = "OpenAI"
       name    = "gpt-4o"
-      version = "2024-05-13"
+      version = "2024-11-20"
     }
     scale = {
       type     = "Standard"
