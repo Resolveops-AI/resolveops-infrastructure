@@ -240,7 +240,6 @@ module "ai" {
   tags                = var.tags
 }
 
-/*
 # Cannot create secrets via Terraform GitHub Actions runner when Key Vault public network access is disabled.
 # Store AI Service Endpoint in Key Vault
 resource "azurerm_key_vault_secret" "ai_endpoint" {
@@ -263,7 +262,6 @@ resource "azurerm_key_vault_secret" "ai_key" {
 
   depends_on = [time_sleep.wait_for_kv_rbac]
 }
-*/
 
 # Private Endpoint for Azure AI Service
 module "pe_ai" {
