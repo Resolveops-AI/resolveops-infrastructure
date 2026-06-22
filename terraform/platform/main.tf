@@ -226,7 +226,7 @@ resource "azurerm_role_assignment" "tf_kv_secrets_officer" {
 # Azure RBAC is eventually consistent — wait for the role assignment to propagate
 resource "time_sleep" "wait_for_kv_rbac" {
   depends_on      = [azurerm_role_assignment.tf_kv_secrets_officer]
-  create_duration = "60s"
+  create_duration = "4m"
 }
 
 # Azure AI Service (OpenAI)
