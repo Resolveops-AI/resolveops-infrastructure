@@ -44,7 +44,7 @@ jobs:
         run: terraform fmt -check -recursive ../../
 
       - name: Bootstrap Terraform State
-        run: bash ../../scripts/bootstrap-tfstate.sh ${{ env.TF_STATE_RESOURCE_GROUP }} ${{ env.TF_STATE_STORAGE_ACCOUNT }} ${{ env.TF_STATE_CONTAINER }} westus2
+        run: bash ../../scripts/bootstrap-tfstate.sh ${{ env.TF_STATE_RESOURCE_GROUP }} ${{ env.TF_STATE_STORAGE_ACCOUNT }} ${{ env.TF_STATE_CONTAINER }} centralindia
 
       - name: Terraform Init
         id: init
