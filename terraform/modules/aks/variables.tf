@@ -24,16 +24,46 @@ variable "vnet_subnet_id" {
   description = "Subnet ID for the default node pool"
 }
 
-variable "node_vm_size" {
+variable "system_node_vm_size" {
   type        = string
-  description = "VM size for the default node pool"
-  default     = "Standard_B2ms"
+  description = "VM size for the system node pool"
+  default     = "Standard_D4s_v3"
 }
 
-variable "node_count" {
+variable "system_node_min_count" {
   type        = number
-  description = "Number of nodes in the default pool"
+  description = "Minimum number of nodes in the system pool"
   default     = 2
+}
+
+variable "system_node_max_count" {
+  type        = number
+  description = "Maximum number of nodes in the system pool"
+  default     = 3
+}
+
+variable "user_node_vm_size" {
+  type        = string
+  description = "VM size for the user node pool"
+  default     = "Standard_DS3_v2"
+}
+
+variable "user_node_min_count" {
+  type        = number
+  description = "Minimum number of nodes in the user pool"
+  default     = 1
+}
+
+variable "user_node_max_count" {
+  type        = number
+  description = "Maximum number of nodes in the user pool"
+  default     = 3
+}
+
+variable "enable_system_pool_taint" {
+  type        = bool
+  description = "Whether to taint the system node pool with CriticalAddonsOnly=true:NoSchedule"
+  default     = false
 }
 
 variable "private_cluster_enabled" {

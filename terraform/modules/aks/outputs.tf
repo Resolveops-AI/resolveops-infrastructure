@@ -41,3 +41,13 @@ output "kube_config_cluster_ca_certificate" {
   description = "Base64 encoded cluster CA certificate."
   sensitive   = true
 }
+
+output "system_node_pool_name" {
+  value       = azurerm_kubernetes_cluster.this.default_node_pool[0].name
+  description = "The name of the system node pool."
+}
+
+output "user_node_pool_name" {
+  value       = azurerm_kubernetes_cluster_node_pool.userpool.name
+  description = "The name of the user node pool."
+}

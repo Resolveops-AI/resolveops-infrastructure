@@ -56,3 +56,12 @@ service_bus_queue_names = [
 
 resolveops_aks_admin_group_object_ids = ["1b351c30-6447-44b5-9ff1-9297cb7aaf9f"]
 resolveops_aks_local_account_disabled = true
+
+# AKS Node Pools Configuration
+system_node_vm_size      = "Standard_D4s_v3"
+system_node_min_count    = 2
+system_node_max_count    = 3
+user_node_vm_size        = "Standard_DS3_v2"
+user_node_min_count      = 1
+user_node_max_count      = 3
+enable_system_pool_taint = false

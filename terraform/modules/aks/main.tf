@@ -18,10 +18,14 @@ resource "azurerm_kubernetes_cluster" "this" {
   azure_policy_enabled      = true
 
   default_node_pool {
-    name           = "default"
-    node_count     = var.node_count
-    vm_size        = var.node_vm_size
-    vnet_subnet_id = var.vnet_subnet_id
+    name                         = "systempool"
+    vm_size                      = var.system_node_vm_size
+    vnet_subnet_id               = var.vnet_subnet_id
+    enable_auto_scaling          = true
+    min_count                    = var.system_node_min_count
+    max_count                    = var.system_node_max_count
+    max_pods                     = 30
+    only_critical_addons_enabled = var.enable_system_pool_taint
   }
 
   identity {
@@ -46,4 +50,17 @@ resource "azurerm_kubernetes_cluster" "this" {
   }
 
   tags = var.tags
+}
+
+resource "azurerm_kubernetes_cluster_node_pool" "userpool" {
+  name                  = "userpool"
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.this.id
+  vm_size               = var.user_node_vm_size
+  vnet_subnet_id        = var.vnet_subnet_id
+  enable_auto_scaling   = true
+  min_count             = var.user_node_min_count
+  max_count             = var.user_node_max_count
+  max_pods              = 30
+  mode                  = "User"
+  tags                  = var.tags
 }

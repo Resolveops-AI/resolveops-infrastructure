@@ -81,6 +81,25 @@ Due to Azure quota and resource limitations, both ResolveOps and QuickHaul appli
 - **Argo CD**: Installed in `argocd` namespace for GitOps
 - **Ingress**: One Application Gateway with AGIC used for both `resolveops-ai.sathvikdevops.online` and `quickhaul.sathvikdevops.site`
 
+### AKS Node Pools
+
+To ensure high availability and stability, the AKS cluster is split into two distinct node pools:
+1. **System Node Pool (`systempool`)**: Dedicated strictly to Kubernetes system components (CoreDNS, Metrics Server, AGIC, etc.). This pool is tainted with `CriticalAddonsOnly=true:NoSchedule` so that no application workloads can be accidentally scheduled here, preventing resource starvation for critical cluster operations.
+2. **User Node Pool (`userpool`)**: Dedicated entirely to application workloads (QuickHaul, ResolveOps AI, MongoDB, Redis, Argo CD, monitoring).
+
+**Important requirement for application manifests:**
+Because the system pool is tainted, all your application manifests (Deployments, StatefulSets) *should* ideally target the user pool directly using a node selector:
+```yaml
+nodeSelector:
+  kubernetes.azure.com/mode: user
+```
+
+**Verification Commands:**
+Once deployed, verify the node pools and their taints/labels using:
+```bash
+az aks nodepool list --resource-group sathvik-rg --cluster-name resolveops-aks-02 -o table
+kubectl get nodes --show-labels
+```
 ### Ownership Boundaries
 
 | Layer | Owner | Examples |
