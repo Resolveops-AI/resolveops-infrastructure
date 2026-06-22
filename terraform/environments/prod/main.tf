@@ -119,7 +119,7 @@ module "role_assignments" {
 }
 
 module "service_bus" {
-  source              = "../../modules/service-bus"
+  source = "../../modules/service-bus"
   # enabled             = var.enable_service_bus
   name                = "${var.project_name}-sb-${var.environment}"
   location            = var.location
