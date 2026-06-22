@@ -61,16 +61,16 @@ module "resolveops_aks" {
   vnet_subnet_id             = module.networking.subnet_ids["resolveops-aks"]
   private_cluster_enabled    = true
   log_analytics_workspace_id = module.log_analytics.id
-  
-  system_node_vm_size        = var.system_node_vm_size
-  system_node_min_count      = var.system_node_min_count
-  system_node_max_count      = var.system_node_max_count
-  user_node_vm_size          = var.user_node_vm_size
-  user_node_min_count        = var.user_node_min_count
-  user_node_max_count        = var.user_node_max_count
-  enable_system_pool_taint   = var.enable_system_pool_taint
 
-  tags                       = var.tags
+  system_node_vm_size      = var.system_node_vm_size
+  system_node_min_count    = var.system_node_min_count
+  system_node_max_count    = var.system_node_max_count
+  user_node_vm_size        = var.user_node_vm_size
+  user_node_min_count      = var.user_node_min_count
+  user_node_max_count      = var.user_node_max_count
+  enable_system_pool_taint = var.enable_system_pool_taint
+
+  tags = var.tags
 
   depends_on = [module.networking]
 }
