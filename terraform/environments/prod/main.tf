@@ -48,7 +48,7 @@ module "aks" {
   vnet_subnet_id             = module.networking.subnet_ids["aks"]
   private_cluster_enabled    = true
   log_analytics_workspace_id = module.log_analytics.id
-  node_vm_size               = "Standard_B2ps_v2"
+  node_vm_size               = "Standard_B2ms"
   node_count                 = 2
   tags                       = local.tags
 

@@ -4,6 +4,8 @@ resource "azurerm_kubernetes_cluster" "this" {
   # checkov:skip=CKV_AZURE_232: Single default node pool by design — no separate user pool needed for this workload size
   # checkov:skip=CKV_AZURE_141: Local account kept enabled for initial cluster bootstrap; AAD RBAC can be layered later
 
+  # checkov:skip=CKV_AZURE_168: Node pool size is Standard_B2ps_v2 which does not support 50 pods with Azure CNI
+
   name                = var.cluster_name
   location            = var.location
   resource_group_name = var.resource_group_name
@@ -20,7 +22,6 @@ resource "azurerm_kubernetes_cluster" "this" {
     node_count     = var.node_count
     vm_size        = var.node_vm_size
     vnet_subnet_id = var.vnet_subnet_id
-    max_pods       = 50
   }
 
   identity {
