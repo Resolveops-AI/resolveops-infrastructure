@@ -12,12 +12,12 @@ subnets = {
   "jumpbox"                = { address_prefixes = ["172.16.6.0/24"] }
 }
 
-acr_name                     = "resolveopsacr03"
+acr_name                     = "resolveopsacr04"
 log_analytics_workspace_name = "resolveops-law"
-key_vault_name               = "sathvik-kv-03"
-storage_account_name         = "resolveopssa03"
+key_vault_name               = "sathvik-kv-04"
+storage_account_name         = "resolveopssa04"
 
-resolveops_aks_name  = "resolveops-aks-02"
+resolveops_aks_name  = "resolveops-aks-04"
 resolveops_namespace = "resolveops"
 
 quickhaul_dev_namespace  = "quickhaul-dev"
@@ -26,7 +26,7 @@ argocd_namespace         = "argocd"
 monitoring_namespace     = "monitoring"
 
 # Azure AI Service (ResolveOps AI)
-ai_service_name = "resolveops-ai-03"
+ai_service_name = "resolveops-ai-04"
 ai_sku_name     = "S0"
 ai_location     = "southindia"
 
@@ -34,13 +34,14 @@ workload_identity_name            = "id-resolveops-workload"
 workload_identity_service_account = "resolveops-workload-sa"
 
 tags = {
-  Project = "resolveops"
-  Owner   = "platform-team"
+  Project     = "resolveops"
+  Owner       = "platform-team"
+  Environment = "dev"
 }
 
 authorized_ip_ranges = ["157.51.232.45/32"]
 
-service_bus_namespace_name = "resolveops-sb-02"
+service_bus_namespace_name = "resolveops-sb-04"
 service_bus_sku            = "Standard"
 
 service_bus_queue_names = [
@@ -65,3 +66,31 @@ user_node_vm_size        = "Standard_DS3_v2"
 user_node_min_count      = 1
 user_node_max_count      = 3
 enable_system_pool_taint = false
+
+# AI Model Deployments
+ai_deployments = {
+  "gpt-4o" = {
+    name = "gpt-4o"
+    model = {
+      format  = "OpenAI"
+      name    = "gpt-4o"
+      version = "2024-05-13"
+    }
+    scale = {
+      type     = "Standard"
+      capacity = 10
+    }
+  }
+  "text-embedding-ada-002" = {
+    name = "text-embedding-ada-002"
+    model = {
+      format  = "OpenAI"
+      name    = "text-embedding-ada-002"
+      version = "2"
+    }
+    scale = {
+      type     = "Standard"
+      capacity = 10
+    }
+  }
+}

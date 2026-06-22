@@ -24,3 +24,20 @@ variable "tags" {
   description = "Tags to apply to the cognitive services account"
   default     = {}
 }
+
+variable "deployments" {
+  description = "Map of cognitive service deployments"
+  type = map(object({
+    name = string
+    model = object({
+      format  = string
+      name    = string
+      version = string
+    })
+    scale = object({
+      type     = string
+      capacity = number
+    })
+  }))
+  default = {}
+}

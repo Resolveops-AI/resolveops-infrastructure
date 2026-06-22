@@ -227,3 +227,20 @@ variable "enable_system_pool_taint" {
   description = "Whether to taint the system node pool with CriticalAddonsOnly=true:NoSchedule"
   default     = false
 }
+
+variable "ai_deployments" {
+  description = "Map of AI model deployments"
+  type = map(object({
+    name = string
+    model = object({
+      format  = string
+      name    = string
+      version = string
+    })
+    scale = object({
+      type     = string
+      capacity = number
+    })
+  }))
+  default = {}
+}

@@ -244,6 +244,7 @@ module "ai" {
   location            = var.ai_location
   resource_group_name = module.resource_group.name
   sku_name            = var.ai_sku_name
+  deployments         = var.ai_deployments
   tags                = var.tags
 }
 

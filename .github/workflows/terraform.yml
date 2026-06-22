@@ -18,13 +18,12 @@ env:
   TF_STATE_KEY: ${{ vars.TF_STATE_KEY }}
 
 jobs:
-  terraform-plan:
-    name: "Terraform Plan"
+  security-scan:
+    name: "Security Scan & Validate"
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: terraform/platform
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -71,6 +70,45 @@ jobs:
           skip_path: terraform/environments
           skip_check: CKV_AZURE_139,CKV_AZURE_237,CKV_AZURE_166,CKV_AZURE_233,CKV_AZURE_164,CKV_AZURE_167,CKV_AZURE_163,CKV_AZURE_165,CKV_AZURE_117,CKV_AZURE_115,CKV_AZURE_227,CKV_AZURE_170,CKV_AZURE_226,CKV_AZURE_6,CKV_AZURE_33
 
+      - name: Publish Status to Job Summary
+        if: always()
+        run: |
+          echo "### Security Scan & Validate Status" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ${{ job.status == 'success' && '✅ Success' || '❌ Failure' }}" >> $GITHUB_STEP_SUMMARY
+
+  terraform-plan:
+    name: "Terraform Plan"
+    needs: security-scan
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform/platform
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        id: init
+        env:
+          ARM_USE_OIDC: true
+          ARM_USE_AZUREAD: true
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ env.TF_STATE_RESOURCE_GROUP }}" \
+            -backend-config="storage_account_name=${{ env.TF_STATE_STORAGE_ACCOUNT }}" \
+            -backend-config="container_name=${{ env.TF_STATE_CONTAINER }}" \
+            -backend-config="key=${{ env.TF_STATE_KEY }}"
+
       - name: Terraform Plan
         id: plan
         run: terraform plan -var-file="terraform.tfvars" -out=tfplan -no-color
@@ -96,7 +134,6 @@ jobs:
     defaults:
       run:
         working-directory: terraform/platform
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -130,11 +167,9 @@ jobs:
             -backend-config="key=${{ env.TF_STATE_KEY }}"
 
       - name: Terraform Apply
-        if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
         run: terraform apply -auto-approve tfplan
 
       - name: Terraform Outputs
-        if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
         run: terraform output
 
       - name: Publish Status to Job Summary
@@ -142,16 +177,21 @@ jobs:
         run: |
           echo "### Terraform Apply Status" >> $GITHUB_STEP_SUMMARY
           echo "- **Status**: ${{ job.status == 'success' && '✅ Success' || '❌ Failure' }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Actor**: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Workflow**: ${{ github.workflow }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Run Link**: [Go to Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
 
   notify:
     name: "Send Email Notification"
-    needs: [terraform-plan, terraform-apply]
+    needs: [security-scan, terraform-plan, terraform-apply]
     runs-on: ubuntu-latest
     if: always()
     steps:
+      - name: Determine Overall Status
+        id: status
+        run: |
+          if [ "${{ needs.security-scan.result }}" == "failure" ] || [ "${{ needs.terraform-plan.result }}" == "failure" ] || [ "${{ needs.terraform-apply.result }}" == "failure" ]; then
+            echo "overall=Failure" >> $GITHUB_OUTPUT
+          else
+            echo "overall=Success" >> $GITHUB_OUTPUT
+          fi
       - name: Send Email
         uses: dawidd6/action-send-mail@v3
         with:
@@ -159,13 +199,19 @@ jobs:
           server_port: 465
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
-          subject: "ResolveOps Deployment Notification - Status: ${{ needs.terraform-apply.result }}"
+          subject: "ResolveOps Deployment Notification - Status: ${{ steps.status.outputs.overall }}"
           to: ${{ secrets.RECIPIENT_EMAIL }}
           from: "ResolveOps CI/CD"
           body: |
             The ResolveOps platform deployment pipeline has completed.
             
-            Result: ${{ needs.terraform-apply.result }}
+            Overall Result: ${{ steps.status.outputs.overall }}
+            
+            Stage Results:
+            - Security Scan & Validate: ${{ needs.security-scan.result }}
+            - Terraform Plan: ${{ needs.terraform-plan.result }}
+            - Terraform Apply: ${{ needs.terraform-apply.result }}
+            
             Triggered by: ${{ github.actor }}
             Branch: ${{ github.ref_name }}
             Commit: ${{ github.sha }}
