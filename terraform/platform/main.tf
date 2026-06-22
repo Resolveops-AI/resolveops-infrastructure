@@ -53,23 +53,15 @@ module "key_vault" {
 
 # AKS cluster where ResolveOps AI platform runs
 module "resolveops_aks" {
-  source                     = "../modules/aks"
-  cluster_name               = var.resolveops_aks_name
-  location                   = var.location
-  resource_group_name        = module.resource_group.name
-  dns_prefix                 = var.resolveops_aks_name
-  vnet_subnet_id             = module.networking.subnet_ids["resolveops-aks"]
-  log_analytics_workspace_id = module.log_analytics.id
-  system_node_auto_scaling   = true
-  system_node_min_count      = 1
-  system_node_max_count      = 2
-  tags                       = var.tags
-  # private_cluster_enabled = true (module default — satisfies org MG Deny policy).
-  # The managed AGIC addon is NOT supported on private clusters; AGIC is installed
-  # post-provisioning via Helm from the jumpbox. See docs/agic-helm-install.md
-
-  admin_group_object_ids = var.resolveops_aks_admin_group_object_ids
-  local_account_disabled = var.resolveops_aks_local_account_disabled
+  source                  = "../modules/aks"
+  cluster_name            = var.resolveops_aks_name
+  location                = var.location
+  resource_group_name     = module.resource_group.name
+  vnet_subnet_id          = module.networking.subnet_ids["resolveops-aks"]
+  private_cluster_enabled = true
+  node_vm_size            = "Standard_B2ps_v2"
+  node_count              = 2
+  tags                    = var.tags
 
   depends_on = [module.networking]
 }
@@ -123,7 +115,7 @@ module "jumpbox" {
   location             = var.location
   resource_group_name  = module.resource_group.name
   subnet_id            = module.networking.subnet_ids["jumpbox"]
-  vm_size              = "Standard_B2s"
+  vm_size              = "Standard_B2ps_v2"
   admin_ssh_public_key = tls_private_key.jumpbox_ssh.public_key_openssh
   tags                 = var.tags
 
