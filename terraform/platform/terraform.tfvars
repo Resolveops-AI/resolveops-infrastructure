@@ -12,10 +12,10 @@ subnets = {
   "jumpbox"                = { address_prefixes = ["172.16.6.0/24"] }
 }
 
-acr_name                     = "resolveopsacr02"
+acr_name                     = "resolveopsacr03"
 log_analytics_workspace_name = "resolveops-law"
-key_vault_name               = "sathvik-kv-02"
-storage_account_name         = "resolveopssa02"
+key_vault_name               = "sathvik-kv-03"
+storage_account_name         = "resolveopssa03"
 
 resolveops_aks_name  = "resolveops-aks-02"
 resolveops_namespace = "resolveops"
@@ -26,7 +26,7 @@ argocd_namespace         = "argocd"
 monitoring_namespace     = "monitoring"
 
 # Azure AI Service (ResolveOps AI)
-ai_service_name = "resolveops-ai-02"
+ai_service_name = "resolveops-ai-03"
 ai_sku_name     = "S0"
 ai_location     = "southindia"
 
