@@ -18,8 +18,8 @@ env:
   TF_STATE_KEY: ${{ vars.TF_STATE_KEY }}
 
 jobs:
-  terraform-platform:
-    name: "Terraform Platform"
+  terraform-plan:
+    name: "Terraform Plan"
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -73,11 +73,65 @@ jobs:
 
       - name: Terraform Plan
         id: plan
-        run: terraform plan -var-file="terraform.tfvars" -no-color
+        run: terraform plan -var-file="terraform.tfvars" -out=tfplan -no-color
+
+      - name: Upload Terraform Plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan
+          path: terraform/platform/tfplan
+          retention-days: 1
+
+      - name: Publish Status to Job Summary
+        if: always()
+        run: |
+          echo "### Terraform Plan Status" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ${{ job.status == 'success' && '✅ Success' || '❌ Failure' }}" >> $GITHUB_STEP_SUMMARY
+
+  terraform-apply:
+    name: "Terraform Apply"
+    needs: terraform-plan
+    runs-on: ubuntu-latest
+    environment: production
+    defaults:
+      run:
+        working-directory: terraform/platform
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Download Terraform Plan
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan
+          path: terraform/platform
+
+      - name: Terraform Init
+        id: init
+        env:
+          ARM_USE_OIDC: true
+          ARM_USE_AZUREAD: true
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ env.TF_STATE_RESOURCE_GROUP }}" \
+            -backend-config="storage_account_name=${{ env.TF_STATE_STORAGE_ACCOUNT }}" \
+            -backend-config="container_name=${{ env.TF_STATE_CONTAINER }}" \
+            -backend-config="key=${{ env.TF_STATE_KEY }}"
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
-        run: terraform apply -var-file="terraform.tfvars" -auto-approve
+        run: terraform apply -auto-approve tfplan
 
       - name: Terraform Outputs
         if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
@@ -86,7 +140,7 @@ jobs:
       - name: Publish Status to Job Summary
         if: always()
         run: |
-          echo "### Terraform Platform Deployment Status" >> $GITHUB_STEP_SUMMARY
+          echo "### Terraform Apply Status" >> $GITHUB_STEP_SUMMARY
           echo "- **Status**: ${{ job.status == 'success' && '✅ Success' || '❌ Failure' }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Actor**: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Workflow**: ${{ github.workflow }}" >> $GITHUB_STEP_SUMMARY
@@ -94,7 +148,7 @@ jobs:
 
   notify:
     name: "Send Email Notification"
-    needs: terraform-platform
+    needs: [terraform-plan, terraform-apply]
     runs-on: ubuntu-latest
     if: always()
     steps:
@@ -105,13 +159,13 @@ jobs:
           server_port: 465
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
-          subject: "ResolveOps Deployment Notification - Status: ${{ needs.terraform-platform.result }}"
+          subject: "ResolveOps Deployment Notification - Status: ${{ needs.terraform-apply.result }}"
           to: ${{ secrets.RECIPIENT_EMAIL }}
           from: "ResolveOps CI/CD"
           body: |
             The ResolveOps platform deployment pipeline has completed.
             
-            Result: ${{ needs.terraform-platform.result }}
+            Result: ${{ needs.terraform-apply.result }}
             Triggered by: ${{ github.actor }}
             Branch: ${{ github.ref_name }}
             Commit: ${{ github.sha }}
