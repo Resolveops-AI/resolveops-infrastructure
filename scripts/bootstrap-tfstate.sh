@@ -34,6 +34,17 @@ for i in {1..3}; do
     --scope "$STORAGE_ID" && break || sleep 5
 done
 
+# Wait for role propagation
+echo "Waiting 15 seconds for role propagation..."
+sleep 15
+
+# Create blob container
+echo "Creating blob container: $CONTAINER_NAME..."
+az storage container create \
+  --name "$CONTAINER_NAME" \
+  --account-name "$STORAGE_ACCOUNT_NAME" \
+  --auth-mode login
+
 # Enable blob versioning
 echo "Enabling blob versioning..."
 az storage account blob-service-properties update \
