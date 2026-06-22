@@ -21,41 +21,17 @@ az storage account create \
   --sku Standard_LRS \
   --encryption-services blob
 
-# Get storage account key
-echo "Retrieving storage account key..."
-ACCOUNT_KEY=$(az storage account keys list \
-  --resource-group $RESOURCE_GROUP_NAME \
-  --account-name $STORAGE_ACCOUNT_NAME \
-  --query '[0].value' \
-  -o tsv)
-
-# Create blob container
-echo "Creating blob container: $CONTAINER_NAME"
-az storage container create \
-  --name $CONTAINER_NAME \
-  --account-name $STORAGE_ACCOUNT_NAME \
-  --auth-mode login
-
 # Assign Storage Blob Data Contributor role to the logged-in identity
 echo "Assigning Storage Blob Data Contributor role to the active identity..."
 STORAGE_ID=$(az storage account show --name $STORAGE_ACCOUNT_NAME --resource-group $RESOURCE_GROUP_NAME --query id -o tsv)
-CURRENT_USER_TYPE=$(az account show --query user.type -o tsv)
-if [ "$CURRENT_USER_TYPE" == "user" ]; then
-  ASSIGNEE_ID=$(az ad signed-in-user show --query id -o tsv)
-  PRINCIPAL_TYPE="User"
-else
-  CLIENT_ID=$(az account show --query user.name -o tsv)
-  ASSIGNEE_ID=$(az ad sp show --id $CLIENT_ID --query id -o tsv)
-  PRINCIPAL_TYPE="ServicePrincipal"
-fi
+ASSIGNEE=$(az account show --query user.name -o tsv)
 
-# Retry loop since role assignment might take a few seconds after storage account creation
+# Retry loop since role assignment propagation might take a few seconds
 for i in {1..3}; do
   az role assignment create \
     --role "Storage Blob Data Contributor" \
-    --assignee-object-id $ASSIGNEE_ID \
-    --assignee-principal-type $PRINCIPAL_TYPE \
-    --scope $STORAGE_ID && break || sleep 5
+    --assignee "$ASSIGNEE" \
+    --scope "$STORAGE_ID" && break || sleep 5
 done
 
 # Enable blob versioning
