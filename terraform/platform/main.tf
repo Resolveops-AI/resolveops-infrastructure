@@ -219,7 +219,7 @@ module "pe_kv" {
 # Role Assignment so Terraform can read/write secrets inside the Key Vault
 resource "azurerm_role_assignment" "tf_kv_secrets_officer" {
   scope                = module.key_vault.id
-  role_definition_name = "Key Vault Administrator"
+  role_definition_name = "Key Vault Secrets Officer"
   principal_id         = data.azurerm_client_config.current.object_id
 }
 
