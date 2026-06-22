@@ -28,7 +28,7 @@ monitoring_namespace     = "monitoring"
 # Azure AI Service (ResolveOps AI)
 ai_service_name = "resolveops-ai-02"
 ai_sku_name     = "S0"
-ai_location     = "centralindia"
+ai_location     = "southindia"
 
 workload_identity_name            = "id-resolveops-workload"
 workload_identity_service_account = "resolveops-workload-sa"
