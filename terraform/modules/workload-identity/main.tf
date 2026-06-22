@@ -6,9 +6,9 @@ resource "azurerm_user_assigned_identity" "this" {
 }
 
 resource "azurerm_federated_identity_credential" "this" {
-  name      = "${var.name}-fic"
-  audience  = ["api://AzureADTokenExchange"]
-  issuer    = var.oidc_issuer_url
-  parent_id = azurerm_user_assigned_identity.this.id
-  subject   = "system:serviceaccount:${var.service_account_namespace}:${var.service_account_name}"
+  name                      = "${var.name}-fic"
+  audience                  = ["api://AzureADTokenExchange"]
+  issuer                    = var.oidc_issuer_url
+  user_assigned_identity_id = azurerm_user_assigned_identity.this.id
+  subject                   = "system:serviceaccount:${var.service_account_namespace}:${var.service_account_name}"
 }
