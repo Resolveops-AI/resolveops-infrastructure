@@ -1,5 +1,11 @@
 data "azurerm_client_config" "current" {}
 
+resource "random_string" "suffix" {
+  length  = 6
+  special = false
+  upper   = false
+}
+
 # Resource group for all platform resources
 module "resource_group" {
   source   = "../modules/resource-group"
@@ -22,7 +28,7 @@ module "networking" {
 # Shared container registry — both clusters pull images from here
 module "acr" {
   source              = "../modules/acr"
-  name                = var.acr_name
+  name                = "${var.acr_name}${random_string.suffix.result}"
   resource_group_name = module.resource_group.name
   location            = var.location
   sku                 = "Basic"
@@ -41,7 +47,7 @@ module "log_analytics" {
 # Key Vault for ResolveOps platform secrets
 module "key_vault" {
   source                     = "../modules/key-vault"
-  name                       = var.key_vault_name
+  name                       = "${var.key_vault_name}${random_string.suffix.result}"
   location                   = var.location
   resource_group_name        = module.resource_group.name
   soft_delete_retention_days = 7
@@ -298,7 +304,7 @@ resource "random_password" "postgres" {
 # Azure PostgreSQL Flexible Server
 module "postgres" {
   source              = "../modules/postgresql"
-  name                = "resolveops-pg-01"
+  name                = "psql-resolveops-dev-${random_string.suffix.result}"
   resource_group_name = module.resource_group.name
   location            = var.location
   admin_username      = var.postgres_admin_username
@@ -340,7 +346,7 @@ resource "azurerm_key_vault_secret" "database_url" {
 # Storage Account
 module "storage_account" {
   source              = "../modules/storage-account"
-  name                = var.storage_account_name
+  name                = "${var.storage_account_name}${random_string.suffix.result}"
   resource_group_name = module.resource_group.name
   location            = var.location
   replication_type    = "GRS"

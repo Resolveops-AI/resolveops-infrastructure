@@ -1,13 +1,11 @@
 # Terraform local state and init artifacts — never commit these
 **/.terraform/
-**/.terraform.lock.hcl
 *.tfplan
 *.tfplan.json
 tfplan
 
 # Sensitive variable files and local state
 terraform.tfvars
-!terraform/platform/terraform.tfvars
 *.auto.tfvars
 *.tfstate*
 .terraform/

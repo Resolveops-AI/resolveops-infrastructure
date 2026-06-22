@@ -1,7 +1,7 @@
-location            = "westus2"
-resource_group_name = "Sathvik-RG"
+location            = "centralus"
+resource_group_name = "sathvik-rg"
 
-vnet_name          = "vnet-resolveops-platform"
+vnet_name          = "resolveops-vnet"
 vnet_address_space = ["172.16.0.0/16"]
 
 subnets = {
@@ -12,12 +12,12 @@ subnets = {
   "jumpbox"                = { address_prefixes = ["172.16.6.0/24"] }
 }
 
-acr_name                     = "resolveopsacr01"
-log_analytics_workspace_name = "law-resolveops-platform"
-key_vault_name               = "sathvik-kv-westus2-01"
-storage_account_name         = "resolveopssa01"
+acr_name                     = "resolveopsacr02"
+log_analytics_workspace_name = "resolveops-law"
+key_vault_name               = "sathvik-kv-02"
+storage_account_name         = "resolveopssa02"
 
-resolveops_aks_name  = "resolveops-aks-01"
+resolveops_aks_name  = "resolveops-aks-02"
 resolveops_namespace = "resolveops"
 
 quickhaul_dev_namespace  = "quickhaul-dev"
@@ -26,9 +26,9 @@ argocd_namespace         = "argocd"
 monitoring_namespace     = "monitoring"
 
 # Azure AI Service (ResolveOps AI)
-ai_service_name = "resolveops-ai-01"
+ai_service_name = "resolveops-ai-02"
 ai_sku_name     = "S0"
-ai_location     = "eastus"
+ai_location     = "centralus"
 
 workload_identity_name            = "id-resolveops-workload"
 workload_identity_service_account = "resolveops-workload-sa"
@@ -40,7 +40,7 @@ tags = {
 
 authorized_ip_ranges = ["157.51.232.45/32"]
 
-service_bus_namespace_name = "resolveops-sb-01"
+service_bus_namespace_name = "resolveops-sb-02"
 service_bus_sku            = "Standard"
 
 service_bus_queue_names = [

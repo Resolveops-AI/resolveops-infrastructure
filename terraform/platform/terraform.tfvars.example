@@ -1,36 +1,16 @@
-resource_group_name = "resolveops-platform-rg-01"
+location            = "centralindia"
+ai_location         = "southindia"
 
-location = "eastus"
+resource_group_name = "rg-resolveops-platform-dev"
+vnet_name           = "vnet-resolveops-platform-dev"
+resolveops_aks_name = "aks-resolveops-platform-dev"
+acr_name            = "acrresolveopsdev"
+key_vault_name      = "kv-resolveops-dev-"
+storage_account_name= "stresolveopsdev"
+# Note: postgres_server_name is derived from a hardcoded base in main.tf, but if it becomes a variable you would set it here.
+# postgres_name = "psql-resolveops-dev-"
 
-acr_name = "resolveopsacr01"
-
-key_vault_name = "resolveops-kv-01"
-
-storage_account_name = "resolveopssa01"
-
-resolveops_aks_name = "resolveops-aks-01"
-
-quickhaul_aks_name = "quickhaul-aks-01"
-
-resolveops_namespace = "resolveops"
-
-quickhaul_dev_namespace = "quickhaul-dev"
-
-quickhaul_prod_namespace = "quickhaul-prod"
-monitoring_namespace = "monitoring"
-
-authorized_ip_ranges = ["<your-public-ip>/32"]
-
-service_bus_namespace_name = "resolveops-sb-01"
-service_bus_sku            = "Standard"
-
-service_bus_queue_names = [
-  "github-sync-requested",
-  "azure-sync-requested",
-  "aws-sync-requested",
-  "resource-scan-completed",
-  "rca-requested",
-  "rca-completed",
-  "notification-requested",
-  "diagram-generation-requested"
-]
+resolveops_namespace      = "resolveops-ai"
+quickhaul_dev_namespace   = "quickhaul-dev"
+quickhaul_prod_namespace  = "quickhaul-prod"
+monitoring_namespace      = "monitoring"

@@ -42,7 +42,15 @@ jobs:
 
       - name: Terraform Init
         id: init
-        run: terraform init
+        env:
+          ARM_USE_OIDC: true
+          ARM_USE_AZUREAD: true
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ env.TF_STATE_RESOURCE_GROUP }}" \
+            -backend-config="storage_account_name=${{ env.TF_STATE_STORAGE_ACCOUNT }}" \
+            -backend-config="container_name=${{ env.TF_STATE_CONTAINER }}" \
+            -backend-config="key=${{ env.TF_STATE_KEY }}"
 
       - name: Terraform Validate
         id: validate

@@ -127,6 +127,54 @@ See the [IAC Implementation Report](IAC_IMPLEMENTATION_REPORT.md) for the full o
 
 ---
 
+## Deploying to a Different Azure Account
+
+To deploy the same architecture to a new Azure subscription/tenant without modifying the Terraform architecture:
+
+1. **Authenticate**:
+   ```bash
+   az login
+   az account show
+   ```
+   Confirm your subscription ID and tenant ID.
+
+2. **Bootstrap the Terraform Backend**:
+   Run the bootstrap script to create the new remote state storage:
+   ```bash
+   chmod +x scripts/bootstrap-tfstate.sh
+   ./scripts/bootstrap-tfstate.sh rg-resolveops-tfstate-dev stresolveopstfstate<unique> tfstate centralindia
+   ```
+   *Note: Ensure your storage account name is globally unique and only contains lowercase letters and numbers.*
+
+3. **Export Local Authentication Variables**:
+   ```bash
+   export ARM_USE_AZUREAD=true
+   export ARM_USE_CLI=true
+   ```
+
+4. **Update Configuration**:
+   ```bash
+   cd terraform/platform
+   cp terraform.tfvars.example terraform.tfvars
+   ```
+   Edit `terraform.tfvars` and update only the account-specific values. 
+
+5. **Deploy**:
+   ```bash
+   terraform fmt
+   terraform init \
+     -backend-config="resource_group_name=rg-resolveops-tfstate-dev" \
+     -backend-config="storage_account_name=stresolveopstfstate<unique>" \
+     -backend-config="container_name=tfstate" \
+     -backend-config="key=resolveops-platform-dev.tfstate"
+   
+   terraform validate
+   terraform plan
+   terraform apply
+   ```
+
+---
+
 ## Scripts
 
 ### `scripts/build-and-push-acr.sh`
