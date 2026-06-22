@@ -21,7 +21,7 @@ resource "azurerm_kubernetes_cluster" "this" {
     name                         = "systempool"
     vm_size                      = var.system_node_vm_size
     vnet_subnet_id               = var.vnet_subnet_id
-    enable_auto_scaling          = true
+    auto_scaling_enabled         = true
     min_count                    = var.system_node_min_count
     max_count                    = var.system_node_max_count
     max_pods                     = 30
@@ -57,7 +57,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "userpool" {
   kubernetes_cluster_id = azurerm_kubernetes_cluster.this.id
   vm_size               = var.user_node_vm_size
   vnet_subnet_id        = var.vnet_subnet_id
-  enable_auto_scaling   = true
+  auto_scaling_enabled  = true
   min_count             = var.user_node_min_count
   max_count             = var.user_node_max_count
   max_pods              = 30
