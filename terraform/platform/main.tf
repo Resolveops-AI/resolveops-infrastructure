@@ -101,11 +101,7 @@ module "workload_identity" {
   depends_on = [module.resolveops_aks]
 }
 
-# Generate SSH key for the jumpbox
-resource "tls_private_key" "jumpbox_ssh" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
+
 
 # Azure Bastion Host for secure access to the VNet
 module "bastion" {
@@ -125,7 +121,7 @@ module "jumpbox" {
   resource_group_name  = module.resource_group.name
   subnet_id            = module.networking.subnet_ids["jumpbox"]
   vm_size              = "Standard_B2s_v2"
-  admin_ssh_public_key = tls_private_key.jumpbox_ssh.public_key_openssh
+  admin_password       = var.jumpbox_admin_password
   tags                 = var.tags
 
   depends_on = [module.resolveops_aks]

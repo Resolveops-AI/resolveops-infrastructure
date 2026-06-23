@@ -22,10 +22,8 @@ resource "azurerm_linux_virtual_machine" "this" {
     azurerm_network_interface.this.id,
   ]
 
-  admin_ssh_key {
-    username   = var.admin_username
-    public_key = var.admin_ssh_public_key
-  }
+  admin_password                  = var.admin_password
+  disable_password_authentication = false
 
   os_disk {
     caching              = "ReadWrite"

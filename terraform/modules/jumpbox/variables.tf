@@ -30,9 +30,9 @@ variable "admin_username" {
   default     = "resolveopsadmin"
 }
 
-variable "admin_ssh_public_key" {
+variable "admin_password" {
   type        = string
-  description = "SSH public key for the admin user"
+  description = "Admin password for the VM"
 }
 
 variable "tags" {
