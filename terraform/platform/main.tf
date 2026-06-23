@@ -248,6 +248,13 @@ module "ai" {
   tags                = var.tags
 }
 
+# The Cognitive Services API sometimes returns "Accepted" state when the resource isn't fully ready
+# to accept private endpoint connections. Adding a delay to avoid AccountProvisioningStateInvalid errors.
+resource "time_sleep" "wait_for_ai_provisioning" {
+  depends_on      = [module.ai]
+  create_duration = "2m"
+}
+
 # Cannot create secrets via Terraform GitHub Actions runner when Key Vault public network access is disabled.
 # Store AI Service Endpoint in Key Vault
 resource "azurerm_key_vault_secret" "ai_endpoint" {
@@ -282,6 +289,8 @@ module "pe_ai" {
   subresource_names              = ["account"]
   private_dns_zone_ids           = [azurerm_private_dns_zone.ai_dns.id]
   tags                           = var.tags
+  
+  depends_on = [time_sleep.wait_for_ai_provisioning]
 }
 
 # Azure Service Bus for ResolveOps AI async workflows
