@@ -23,6 +23,7 @@ resource "azurerm_kubernetes_cluster" "this" {
 
   default_node_pool {
     name                         = "systempool"
+    temporary_name_for_rotation  = "tmpsystem"
     vm_size                      = var.system_node_vm_size
     vnet_subnet_id               = var.vnet_subnet_id
     auto_scaling_enabled         = true
