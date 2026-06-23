@@ -379,6 +379,19 @@ resource "azurerm_storage_container" "solutions" {
   container_access_type = "private"
 }
 
+resource "azurerm_storage_container" "artifacts" {
+  name                  = "artifacts"
+  storage_account_id    = module.storage_account.id
+  container_access_type = "private"
+}
+
+# Role Assignment so ResolveOps Workload Identity can read/write artifacts to Blob Storage
+resource "azurerm_role_assignment" "resolveops_blob_data_contributor" {
+  scope                = module.storage_account.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = module.workload_identity.principal_id
+}
+
 # Private Endpoint for Blob Storage
 module "pe_blob" {
   source                         = "../modules/private-endpoint"

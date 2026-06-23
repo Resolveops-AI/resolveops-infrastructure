@@ -114,3 +114,8 @@ output "storage_account_name" {
   value       = module.storage_account.name
   description = "Storage Account Name"
 }
+
+output "artifacts_blob_container_name" {
+  value       = azurerm_storage_container.artifacts.name
+  description = "Blob container for ResolveOps artifacts"
+}
