@@ -54,6 +54,10 @@ resource "azurerm_kubernetes_cluster" "this" {
     secret_rotation_enabled = true
   }
 
+  ingress_application_gateway {
+    gateway_id = var.appgw_id
+  }
+
   tags = var.tags
 }
 

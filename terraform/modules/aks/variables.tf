@@ -94,3 +94,9 @@ variable "admin_group_object_ids" {
   description = "AAD admin group object IDs for the AKS cluster"
   default     = []
 }
+
+variable "appgw_id" {
+  type        = string
+  description = "ID of the Application Gateway to link with AGIC"
+  default     = ""
+}

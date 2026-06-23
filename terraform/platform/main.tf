@@ -71,6 +71,7 @@ module "resolveops_aks" {
   user_node_min_count      = var.user_node_min_count
   user_node_max_count      = var.user_node_max_count
   enable_system_pool_taint = var.enable_system_pool_taint
+  appgw_id                 = module.appgw.id
 
   tags = var.tags
 
