@@ -88,3 +88,9 @@ variable "local_account_disabled" {
   description = "Disable local accounts for the AKS cluster"
   default     = false
 }
+
+variable "admin_group_object_ids" {
+  type        = list(string)
+  description = "AAD admin group object IDs for the AKS cluster"
+  default     = []
+}

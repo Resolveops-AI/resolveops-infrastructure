@@ -62,6 +62,7 @@ module "resolveops_aks" {
   private_cluster_enabled    = true
   log_analytics_workspace_id = module.log_analytics.id
   local_account_disabled     = var.resolveops_aks_local_account_disabled
+  admin_group_object_ids     = var.resolveops_aks_admin_group_object_ids
 
   system_node_vm_size      = var.system_node_vm_size
   system_node_min_count    = var.system_node_min_count
