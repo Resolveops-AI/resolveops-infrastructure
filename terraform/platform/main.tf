@@ -289,7 +289,7 @@ module "pe_ai" {
   subresource_names              = ["account"]
   private_dns_zone_ids           = [azurerm_private_dns_zone.ai_dns.id]
   tags                           = var.tags
-  
+
   depends_on = [time_sleep.wait_for_ai_provisioning]
 }
 
