@@ -115,14 +115,14 @@ module "bastion" {
 
 # Ubuntu Linux Jumpbox VM for managing private AKS clusters
 module "jumpbox" {
-  source               = "../modules/jumpbox"
-  name                 = "resolveops-jumpbox"
-  location             = var.location
-  resource_group_name  = module.resource_group.name
-  subnet_id            = module.networking.subnet_ids["jumpbox"]
-  vm_size              = "Standard_B2s_v2"
-  admin_password       = var.jumpbox_admin_password
-  tags                 = var.tags
+  source              = "../modules/jumpbox"
+  name                = "resolveops-jumpbox"
+  location            = var.location
+  resource_group_name = module.resource_group.name
+  subnet_id           = module.networking.subnet_ids["jumpbox"]
+  vm_size             = "Standard_B2s_v2"
+  admin_password      = var.jumpbox_admin_password
+  tags                = var.tags
 
   depends_on = [module.resolveops_aks]
 }
