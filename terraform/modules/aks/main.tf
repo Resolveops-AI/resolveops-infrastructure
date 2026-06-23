@@ -2,7 +2,6 @@ data "azurerm_client_config" "current" {}
 
 resource "azurerm_kubernetes_cluster" "this" {
   # checkov:skip=CKV_AZURE_232: Single default node pool by design — no separate user pool needed for this workload size
-  # checkov:skip=CKV_AZURE_141: Local account kept enabled for initial cluster bootstrap; AAD RBAC can be layered later
 
   # checkov:skip=CKV_AZURE_168: Node pool size is Standard_B2ps_v2 which does not support 50 pods with Azure CNI
 
@@ -14,7 +13,7 @@ resource "azurerm_kubernetes_cluster" "this" {
   kubernetes_version        = var.kubernetes_version
   private_cluster_enabled   = var.private_cluster_enabled
   automatic_upgrade_channel = "stable"
-  local_account_disabled    = false
+  local_account_disabled    = var.local_account_disabled
   azure_policy_enabled      = true
 
   default_node_pool {

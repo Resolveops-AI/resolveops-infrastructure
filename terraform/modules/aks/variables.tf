@@ -82,3 +82,9 @@ variable "tags" {
   description = "Tags to apply to the AKS resources"
   default     = {}
 }
+
+variable "local_account_disabled" {
+  type        = bool
+  description = "Disable local accounts for the AKS cluster"
+  default     = false
+}

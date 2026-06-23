@@ -61,6 +61,7 @@ module "resolveops_aks" {
   vnet_subnet_id             = module.networking.subnet_ids["resolveops-aks"]
   private_cluster_enabled    = true
   log_analytics_workspace_id = module.log_analytics.id
+  local_account_disabled     = var.resolveops_aks_local_account_disabled
 
   system_node_vm_size      = var.system_node_vm_size
   system_node_min_count    = var.system_node_min_count

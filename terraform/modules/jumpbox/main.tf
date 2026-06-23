@@ -14,6 +14,8 @@ resource "azurerm_network_interface" "this" {
 
 resource "azurerm_linux_virtual_machine" "this" {
   # checkov:skip=CKV_AZURE_1: Password authentication is required for this jumpbox
+  # checkov:skip=CKV_AZURE_149: Password authentication is required for this jumpbox
+  # checkov:skip=CKV_AZURE_178: Password authentication is required for this jumpbox
   name                = var.name
   resource_group_name = var.resource_group_name
   location            = var.location
