@@ -18,7 +18,7 @@ key_vault_name               = "sathvik-kv-05"
 storage_account_name         = "resolveopssa05"
 
 resolveops_aks_name  = "resolveops-aks-05"
-resolveops_namespace = "resolveops"
+resolveops_namespace = "resolveops-ai"
 
 quickhaul_dev_namespace  = "quickhaul-dev"
 quickhaul_prod_namespace = "quickhaul-prod"
@@ -31,7 +31,7 @@ ai_sku_name     = "S0"
 ai_location     = "eastus"
 
 workload_identity_name            = "id-resolveops-workload"
-workload_identity_service_account = "resolveops-workload-sa"
+workload_identity_service_account = "resolveops-workload-identity-sa"
 
 tags = {
   Project     = "resolveops"
