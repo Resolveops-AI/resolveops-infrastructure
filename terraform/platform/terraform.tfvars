@@ -12,12 +12,12 @@ subnets = {
   "jumpbox"                = { address_prefixes = ["172.16.6.0/24"] }
 }
 
-acr_name                     = "resolveopsacr04"
+acr_name                     = "resolveopsacr05"
 log_analytics_workspace_name = "resolveops-law"
-key_vault_name               = "sathvik-kv-04"
-storage_account_name         = "resolveopssa04"
+key_vault_name               = "sathvik-kv-05"
+storage_account_name         = "resolveopssa05"
 
-resolveops_aks_name  = "resolveops-aks-04"
+resolveops_aks_name  = "resolveops-aks-05"
 resolveops_namespace = "resolveops"
 
 quickhaul_dev_namespace  = "quickhaul-dev"
@@ -26,7 +26,7 @@ argocd_namespace         = "argocd"
 monitoring_namespace     = "monitoring"
 
 # Azure AI Service (ResolveOps AI)
-ai_service_name = "resolveops-ai-04"
+ai_service_name = "resolveops-ai-05"
 ai_sku_name     = "S0"
 ai_location     = "eastus"
 
@@ -41,7 +41,7 @@ tags = {
 
 authorized_ip_ranges = ["157.51.232.45/32"]
 
-service_bus_namespace_name = "resolveops-sb-04"
+service_bus_namespace_name = "resolveops-sb-05"
 service_bus_sku            = "Standard"
 
 service_bus_queue_names = [
