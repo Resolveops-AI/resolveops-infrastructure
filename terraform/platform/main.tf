@@ -412,3 +412,38 @@ module "pe_blob" {
   private_dns_zone_ids           = [azurerm_private_dns_zone.blob_dns.id]
   tags                           = var.tags
 }
+
+resource "azurerm_role_assignment" "agic_appgw_contributor" {
+  scope                = module.appgw.id
+  role_definition_name = "Contributor"
+  principal_id         = module.resolveops_aks.ingress_application_gateway_identity_object_id
+}
+
+resource "azurerm_role_assignment" "agic_rg_reader" {
+  scope                = module.resource_group.id
+  role_definition_name = "Reader"
+  principal_id         = module.resolveops_aks.ingress_application_gateway_identity_object_id
+}
+
+resource "azurerm_role_assignment" "agic_subnet_network_contributor" {
+  scope                = module.networking.subnet_ids["appgw"]
+  role_definition_name = "Network Contributor"
+  principal_id         = module.resolveops_aks.ingress_application_gateway_identity_object_id
+}
+
+# Generate random string for JWT secret
+resource "random_password" "jwt_secret" {
+  length  = 64
+  special = false
+}
+
+# Store jwt-secret in Key Vault
+resource "azurerm_key_vault_secret" "jwt_secret" {
+  name            = "jwt-secret"
+  value           = random_password.jwt_secret.result
+  key_vault_id    = module.key_vault.id
+  content_type    = "text/plain"
+  expiration_date = "2027-12-31T23:59:59Z"
+
+  depends_on = [time_sleep.wait_for_kv_rbac]
+}
