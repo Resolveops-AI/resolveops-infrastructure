@@ -434,26 +434,6 @@ module "pe_blob" {
   tags                           = var.tags
 }
 
-removed {
-  from = azurerm_role_assignment.agic_appgw_contributor
-  lifecycle {
-    destroy = false
-  }
-}
-
-removed {
-  from = azurerm_role_assignment.agic_rg_reader
-  lifecycle {
-    destroy = false
-  }
-}
-
-removed {
-  from = azurerm_role_assignment.agic_subnet_network_contributor
-  lifecycle {
-    destroy = false
-  }
-}
 
 # Generate random string for JWT secret
 resource "random_password" "jwt_secret" {
@@ -461,10 +441,6 @@ resource "random_password" "jwt_secret" {
   special = false
 }
 
-import {
-  to = azurerm_key_vault_secret.jwt_secret
-  id = "https://sathvik-kv-05.vault.azure.net/secrets/jwt-secret/ec84428da6554899a3a6d18726dbabd2"
-}
 
 # Store jwt-secret in Key Vault
 resource "azurerm_key_vault_secret" "jwt_secret" {
