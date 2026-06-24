@@ -300,7 +300,28 @@ module "service_bus" {
   resource_group_name = module.resource_group.name
   sku                 = var.service_bus_sku
   queue_names         = var.service_bus_queue_names
-  tags                = var.tags
+  queues_config = {
+    "notification-requested" = {
+      dead_lettering_on_message_expiration = true
+      default_message_ttl                  = "PT10M"
+      max_delivery_count                   = 5
+    }
+  }
+  tags = var.tags
+}
+
+# RBAC for Service Bus Data Sender
+resource "azurerm_role_assignment" "resolveops_sb_sender" {
+  scope                = module.service_bus.namespace_id
+  role_definition_name = "Azure Service Bus Data Receiver"
+  principal_id         = module.workload_identity.principal_id
+}
+
+# RBAC for Service Bus Data Receiver (using sender/receiver role on the same principal per user requirements)
+resource "azurerm_role_assignment" "resolveops_sb_sender_role" {
+  scope                = module.service_bus.namespace_id
+  role_definition_name = "Azure Service Bus Data Sender"
+  principal_id         = module.workload_identity.principal_id
 }
 
 # Generate random password for PostgreSQL

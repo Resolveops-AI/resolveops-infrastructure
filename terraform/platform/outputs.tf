@@ -112,3 +112,13 @@ output "artifacts_blob_container_name" {
   value       = azurerm_storage_container.artifacts.name
   description = "Blob container for ResolveOps artifacts"
 }
+
+output "service_bus_fqdn" {
+  value       = "${module.service_bus.namespace_name}.servicebus.windows.net"
+  description = "The FQDN of the Service Bus namespace"
+}
+
+output "service_bus_queue_name" {
+  value       = "notification-requested"
+  description = "The Service Bus queue for notifications"
+}

@@ -18,8 +18,18 @@ resource "azurerm_servicebus_namespace" "this" {
   tags = var.tags
 }
 
+locals {
+  all_queues = merge(
+    { for q in var.queue_names : q => {} },
+    var.queues_config
+  )
+}
+
 resource "azurerm_servicebus_queue" "queues" {
-  for_each     = toset(var.queue_names)
-  name         = each.value
-  namespace_id = azurerm_servicebus_namespace.this.id
+  for_each                             = local.all_queues
+  name                                 = each.key
+  namespace_id                         = azurerm_servicebus_namespace.this.id
+  dead_lettering_on_message_expiration = try(each.value.dead_lettering_on_message_expiration, false)
+  default_message_ttl                  = try(each.value.default_message_ttl, null)
+  max_delivery_count                   = try(each.value.max_delivery_count, 10)
 }

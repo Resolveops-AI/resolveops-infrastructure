@@ -25,6 +25,16 @@ variable "queue_names" {
   default     = []
 }
 
+variable "queues_config" {
+  type = map(object({
+    dead_lettering_on_message_expiration = optional(bool, false)
+    default_message_ttl                  = optional(string)
+    max_delivery_count                   = optional(number)
+  }))
+  description = "Detailed configuration for specific queues"
+  default     = {}
+}
+
 variable "tags" {
   type        = map(string)
   description = "Tags to apply to resources."
