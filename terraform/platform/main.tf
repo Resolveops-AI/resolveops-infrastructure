@@ -421,6 +421,16 @@ resource "azurerm_role_assignment" "resolveops_blob_data_contributor" {
   principal_id         = module.workload_identity.principal_id
 }
 
+# Role Assignment so ResolveOps pods can publish and consume Service Bus messages
+# using DefaultAzureCredential (Workload Identity) — no connection strings required.
+# Azure Service Bus Data Owner grants both send (api-gateway-service) and
+# receive (notification-service) permissions on the namespace.
+resource "azurerm_role_assignment" "resolveops_sb_data_owner" {
+  scope                = module.service_bus.namespace_id
+  role_definition_name = "Azure Service Bus Data Owner"
+  principal_id         = module.workload_identity.principal_id
+}
+
 # Private Endpoint for Blob Storage
 module "pe_blob" {
   source                         = "../modules/private-endpoint"
