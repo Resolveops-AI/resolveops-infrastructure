@@ -53,6 +53,6 @@ output "user_node_pool_name" {
 }
 
 output "ingress_application_gateway_identity_object_id" {
-  value       = azurerm_kubernetes_cluster.this.ingress_application_gateway_identity[0].object_id
+  value       = azurerm_kubernetes_cluster.this.ingress_application_gateway[0].ingress_application_gateway_identity[0].object_id
   description = "The object ID of the AGIC identity"
 }
