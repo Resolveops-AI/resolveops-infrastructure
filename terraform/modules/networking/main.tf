@@ -25,6 +25,9 @@ resource "azurerm_subnet" "bastion" {
 }
 
 resource "azurerm_network_security_group" "nsg" {
+  # checkov:skip=CKV_AZURE_160: Port 80 must be open on the Application Gateway subnet to accept Cloudflare proxy traffic.
+  # HTTPS is terminated at the Cloudflare edge. Cloudflare connects to the origin (AppGW) on HTTP port 80.
+  # Blocking port 80 here would break all public ingress for all hosted applications.
   name                = "${var.vnet_name}-nsg"
   location            = var.location
   resource_group_name = var.resource_group_name
