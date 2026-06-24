@@ -29,6 +29,7 @@ resource "azurerm_network_security_group" "nsg" {
   location            = var.location
   resource_group_name = var.resource_group_name
 
+  # Required for Azure Application Gateway management plane (health probes etc.)
   security_rule {
     name                       = "AllowAppGwCommunication"
     priority                   = 100
@@ -41,8 +42,35 @@ resource "azurerm_network_security_group" "nsg" {
     destination_address_prefix = "*"
   }
 
+  # Required for Application Gateway to receive inbound HTTP traffic from Cloudflare / internet
+  security_rule {
+    name                       = "AllowHttpInbound"
+    priority                   = 200
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "80"
+    source_address_prefix      = "Internet"
+    destination_address_prefix = "*"
+  }
+
+  # Required for Application Gateway to receive inbound HTTPS traffic from Cloudflare / internet
+  security_rule {
+    name                       = "AllowHttpsInbound"
+    priority                   = 210
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "443"
+    source_address_prefix      = "Internet"
+    destination_address_prefix = "*"
+  }
+
   tags = var.tags
 }
+
 
 resource "azurerm_network_security_group" "bastion" {
   count               = contains(keys(var.subnets), "AzureBastionSubnet") ? 1 : 0
