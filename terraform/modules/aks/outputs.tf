@@ -51,3 +51,8 @@ output "user_node_pool_name" {
   value       = azurerm_kubernetes_cluster_node_pool.userpool.name
   description = "The name of the user node pool."
 }
+
+output "ingress_application_gateway_identity_object_id" {
+  value       = azurerm_kubernetes_cluster.this.ingress_application_gateway_identity[0].object_id
+  description = "The object ID of the AGIC identity"
+}
