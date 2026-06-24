@@ -434,28 +434,36 @@ module "pe_blob" {
   tags                           = var.tags
 }
 
-resource "azurerm_role_assignment" "agic_appgw_contributor" {
-  scope                = module.appgw.id
-  role_definition_name = "Contributor"
-  principal_id         = module.resolveops_aks.ingress_application_gateway_identity_object_id
+removed {
+  from = azurerm_role_assignment.agic_appgw_contributor
+  lifecycle {
+    destroy = false
+  }
 }
 
-resource "azurerm_role_assignment" "agic_rg_reader" {
-  scope                = module.resource_group.id
-  role_definition_name = "Reader"
-  principal_id         = module.resolveops_aks.ingress_application_gateway_identity_object_id
+removed {
+  from = azurerm_role_assignment.agic_rg_reader
+  lifecycle {
+    destroy = false
+  }
 }
 
-resource "azurerm_role_assignment" "agic_subnet_network_contributor" {
-  scope                = module.networking.subnet_ids["appgw"]
-  role_definition_name = "Network Contributor"
-  principal_id         = module.resolveops_aks.ingress_application_gateway_identity_object_id
+removed {
+  from = azurerm_role_assignment.agic_subnet_network_contributor
+  lifecycle {
+    destroy = false
+  }
 }
 
 # Generate random string for JWT secret
 resource "random_password" "jwt_secret" {
   length  = 64
   special = false
+}
+
+import {
+  to = azurerm_key_vault_secret.jwt_secret
+  id = "https://sathvik-kv-05.vault.azure.net/secrets/jwt-secret/ec84428da6554899a3a6d18726dbabd2"
 }
 
 # Store jwt-secret in Key Vault
