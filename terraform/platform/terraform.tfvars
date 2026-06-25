@@ -55,7 +55,7 @@ service_bus_queue_names = [
   "diagram-generation-requested"
 ]
 
-resolveops_aks_admin_group_object_ids = ["1b351c30-6447-44b5-9ff1-9297cb7aaf9f", "021c81b7-44ed-4a48-affb-6e0d3ec6fe16"]
+resolveops_aks_admin_group_object_ids = ["021c81b7-44ed-4a48-affb-6e0d3ec6fe16"]
 resolveops_aks_local_account_disabled = true
 
 # AKS Node Pools Configuration
