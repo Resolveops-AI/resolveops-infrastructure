@@ -462,3 +462,33 @@ resource "azurerm_key_vault_secret" "jwt_secret" {
 
   depends_on = [time_sleep.wait_for_kv_rbac]
 }
+
+# Grant the deploying user/service principal "Azure Kubernetes Service Cluster User Role"
+resource "azurerm_role_assignment" "tf_aks_user" {
+  scope                = module.resolveops_aks.id
+  role_definition_name = "Azure Kubernetes Service Cluster User Role"
+  principal_id         = data.azurerm_client_config.current.object_id
+}
+
+# Grant the deploying user/service principal "Azure Kubernetes Service RBAC Cluster Admin"
+resource "azurerm_role_assignment" "tf_aks_rbac_admin" {
+  scope                = module.resolveops_aks.id
+  role_definition_name = "Azure Kubernetes Service RBAC Cluster Admin"
+  principal_id         = data.azurerm_client_config.current.object_id
+}
+
+# Grant additional admin group/users "Azure Kubernetes Service Cluster User Role"
+resource "azurerm_role_assignment" "aks_admins_cluster_user" {
+  for_each             = toset(var.resolveops_aks_admin_group_object_ids)
+  scope                = module.resolveops_aks.id
+  role_definition_name = "Azure Kubernetes Service Cluster User Role"
+  principal_id         = each.value
+}
+
+# Grant additional admin group/users "Azure Kubernetes Service RBAC Cluster Admin"
+resource "azurerm_role_assignment" "aks_admins_rbac_admin" {
+  for_each             = toset(var.resolveops_aks_admin_group_object_ids)
+  scope                = module.resolveops_aks.id
+  role_definition_name = "Azure Kubernetes Service RBAC Cluster Admin"
+  principal_id         = each.value
+}
