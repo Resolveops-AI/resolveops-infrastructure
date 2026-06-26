@@ -75,7 +75,7 @@ resource "azurerm_web_application_firewall_policy" "waf" {
 
   policy_settings {
     enabled                     = true
-    mode                        = "Prevention"
+    mode                        = "Detection"
     request_body_check          = true
     max_request_body_size_in_kb = 128
     file_upload_limit_in_mb     = 100
