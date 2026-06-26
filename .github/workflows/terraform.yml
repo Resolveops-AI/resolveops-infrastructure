@@ -211,7 +211,7 @@ jobs:
             - Security Scan & Validate: ${{ needs.security-scan.result }}
             - Terraform Plan: ${{ needs.terraform-plan.result }}
             - Terraform Apply: ${{ needs.terraform-apply.result }}
-            
+           
             Triggered by: ${{ github.actor }}
             Branch: ${{ github.ref_name }}
             Commit: ${{ github.sha }}
