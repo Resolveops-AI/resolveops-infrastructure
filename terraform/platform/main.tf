@@ -492,3 +492,12 @@ resource "azurerm_role_assignment" "aks_admins_rbac_admin" {
   role_definition_name = "Azure Kubernetes Service RBAC Cluster Admin"
   principal_id         = each.value
 }
+
+# Grant additional admin group/users "Key Vault Secrets Officer" on Key Vault
+resource "azurerm_role_assignment" "aks_admins_kv_officer" {
+  for_each             = toset(var.resolveops_aks_admin_group_object_ids)
+  scope                = module.key_vault.id
+  role_definition_name = "Key Vault Secrets Officer"
+  principal_id         = each.value
+}
+
