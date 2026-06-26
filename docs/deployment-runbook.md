@@ -1,11 +1,11 @@
-# ResolveOps & QuickHaul Deployment Runbook
+# ResolveOps & QuickHaul Deployment & Troubleshooting Runbook
 
-This document details the step-by-step commands required to configure the administrative Jumpbox VM, authenticate with Azure, bootstrap Kubernetes resources, and deploy the application workloads into the user node pool.
+This document details the step-by-step commands required to configure the administrative Jumpbox VM, connect to the private AKS cluster, bootstrap resources, deploy the application workloads, and troubleshoot common infrastructure issues.
 
 ---
 
 ## Phase 1: Jumpbox CLI Tool Setup
-*Purpose: Install all required CLI utilities on the Ubuntu 22.04 Jumpbox VM to manage Azure and Kubernetes resources.*
+*Purpose: Install all required CLI utilities on the Ubuntu 22.04 Jumpbox VM.*
 
 ### 1. Install Azure CLI (`az`)
 ```bash
@@ -39,13 +39,13 @@ helm version
 ---
 
 ## Phase 2: Establish Cluster Connectivity
-*Purpose: Authenticate with Azure Active Directory and download the Kubernetes credentials to target the private AKS API server.*
+*Purpose: Authenticate with Azure Active Directory and download the Kubernetes credentials.*
 
 ```bash
 # 1. Log in to your Azure account
 az login
 
-# 2. Fetch the credentials for the private cluster (overwriting existing if any)
+# 2. Fetch the credentials for the private cluster
 az aks get-credentials --resource-group sathvik-rg --name resolveops-aks-05 --overwrite-existing
 
 # 3. Verify that the nodes are reachable
@@ -55,7 +55,7 @@ kubectl get nodes -o wide
 ---
 
 ## Phase 3: Bootstrap Kubernetes Namespaces & Secrets
-*Purpose: Create isolation boundaries and configure environment secrets required by workloads to connect to PostgreSQL.*
+*Purpose: Create isolation boundaries and configure environment secrets.*
 
 ```bash
 # 1. Create target namespaces
@@ -76,7 +76,7 @@ kubectl create secret generic resolveops-secrets \
 ---
 
 ## Phase 4: Configure Workload Identity
-*Purpose: Allow ResolveOps AI pods to leverage Azure AD Federated Credentials to access cloud resources securely.*
+*Purpose: Allow ResolveOps AI pods to leverage Azure AD Federated Credentials.*
 
 ```bash
 cat <<EOF | kubectl apply -f -
@@ -93,7 +93,7 @@ EOF
 ---
 
 ## Phase 5: Formatting Application Pods for User Node Pool
-*Purpose: Ensure all workload deployments target the userpool since the systempool is tainted and blocks application pods.*
+*Purpose: Ensure all workload deployments target the userpool.*
 
 Add the `nodeSelector` block under `spec.template.spec` in your deployment manifests:
 
@@ -109,7 +109,7 @@ spec:
 ---
 
 ## Phase 6: Deploy Argo CD & QuickHaul Workloads
-*Purpose: Set up Argo CD in the cluster and establish GitOps CD pipelines to automatically synchronize the QuickHaul Helm chart.*
+*Purpose: Set up Argo CD in the cluster and establish GitOps CD pipelines.*
 
 ```bash
 # 1. Add and update Argo CD repository
@@ -122,7 +122,7 @@ helm install argocd argo/argo-cd -n argocd
 # 3. Fetch the auto-generated Argo CD Admin Password
 kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
 
-# 4. Create the Argo CD Application Manifest
+# 4. Create the Argo CD Application Manifest (specifying registry parameters)
 cat <<EOF | kubectl apply -f -
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -134,12 +134,10 @@ spec:
   source:
     repoURL: 'https://github.com/Resolveops-AI/resolveops-application.git'
     targetRevision: HEAD
-    # Corrected path to the chart
     path: quickhaul/helm/quickhaul
     helm:
       valueFiles:
         - values-dev.yaml
-      # Inject the ACR Login Server parameter
       parameters:
         - name: global.imageRegistry
           value: resolveopsacr05.azurecr.io
@@ -158,7 +156,7 @@ EOF
 ---
 
 ## Phase 7: Configure Application Ingress (AGIC Routing)
-*Purpose: Expose services publicly using Application Gateway rules mapped to your custom domains.*
+*Purpose: Expose services publicly using Application Gateway.*
 
 ### 1. Create Ingress for Argo CD Portal
 ```bash
@@ -211,8 +209,52 @@ spec:
 EOF
 ```
 
-### 3. Force AGIC Sync
-```bash
-# Restart the Ingress controller to program the Application Gateway immediately
-kubectl delete pod -n kube-system -l app=ingress-appgw
-```
+---
+
+## Phase 8: Troubleshooting Log & Incident Resolution
+
+### Incident 1: Kubernetes API Access Forbidden
+* **Symptom:** `Error from server (Forbidden): nodes is forbidden` when running `kubectl get nodes`.
+* **Cause:** Azure RBAC was enabled for the AKS API, but the active user was not assigned administrative roles.
+* **Resolution:** Added role assignments for `Azure Kubernetes Service Cluster User Role` and `Azure Kubernetes Service RBAC Cluster Admin` in `main.tf` for the admin users.
+
+### Incident 2: Key Vault Access Forbidden (`ForbiddenByRbac`)
+* **Symptom:** `Caller is not authorized to perform action: Microsoft.KeyVault/vaults/secrets/getSecret/action` when fetching `database-url`.
+* **Cause:** The active user lacked Key Vault permissions because Azure Key Vault uses RBAC instead of Access Policies.
+* **Resolution:** Added `Key Vault Secrets Officer` role assignment in `main.tf` to the admin user principal IDs.
+
+### Incident 3: Soft-Deleted Resource Conflicts (409 Conflict)
+* **Symptom:** `FlagMustBeSetForRestore: An existing resource has been soft-deleted...` during Key Vault/AI deployment.
+* **Cause:** Key Vault and OpenAI names are globally unique; previous resources were in a soft-deleted state.
+* **Resolution:** Suffixes in `terraform.tfvars` were incremented (`-05` ➔ `-06` ➔ `-07`).
+
+### Incident 4: Resource Group Deletion Blocked during Destroy
+* **Symptom:** `deleting Resource Group "sathvik-rg": the Resource Group still contains Resources`.
+* **Cause:** AKS dynamically created a `ContainerInsights` solution that wasn't managed directly by Terraform.
+* **Resolution:** Configured `prevent_deletion_if_contains_resources = false` inside `providers.tf` for the `resource_group` block.
+
+### Incident 5: AGIC Access Forbidden (403 Error)
+* **Symptom:** AGIC logs showed `ErrorApplicationGatewayForbidden` and failed to update Application Gateway backend pools.
+* **Cause:** The new cluster's AGIC identity lacked RBAC access to read/write the gateway configuration.
+* **Resolution:** Added `Contributor` role on App Gateway, `Reader` on Resource Group, and `Network Contributor` on VNet to the AGIC managed identity object ID in `main.tf`.
+
+### Incident 6: WAF Policy Blocking App Traffic
+* **Symptom:** WAF rules block normal application operations.
+* **Cause:** WAF was configured in strict `Prevention` mode.
+* **Resolution:** Changed WAF mode to `Detection` in `modules/application-gateway/main.tf` to allow logs without blocking traffic.
+
+### Incident 7: Argo CD Bad Gateway (502 Error)
+* **Symptom:** `Bad Gateway` when loading `argocd.sathvikdevops.site`.
+* **Cause:** Backend SSL protocol mismatch. The App Gateway was querying HTTP but Argo CD server expected HTTPS.
+* **Resolution:** Configured Argo CD to run in insecure mode (`server.insecure: "true"` inside `argocd-cmd-params-cm`), restarted `argocd-server`, and changed the ingress backend port to `80`.
+
+### Incident 8: Image Pull Backoff on QuickHaul Pods
+* **Symptom:** `failed to pull and unpack image "docker.io/library/quickhaul-auth:dev-xxxx"`
+* **Cause:** The registry prefix defaulted to docker.io because `global.imageRegistry` Helm parameter was not specified in Argo CD.
+* **Resolution:** Updated the Argo CD Application manifest to inject `global.imageRegistry = resolveopsacr05.azurecr.io` under Helm parameters.
+
+### Incident 9: Image Pull Backoff due to ACR Authorization (AcrPull)
+* **Symptom:** Pods stuck in `ImagePullBackOff` showing `pull access denied` or `authorization failed` when pulling from `resolveopsacr05.azurecr.io`.
+* **Cause:** The newly created AKS cluster's Kubelet Managed Identity lacked permissions to read/pull images from the Azure Container Registry (ACR).
+* **Resolution:** Added the `AcrPull` role assignment in `main.tf` mapping the AKS Kubelet Identity (`kubelet_identity_object_id`) to the Container Registry (`acr.id`).
+
