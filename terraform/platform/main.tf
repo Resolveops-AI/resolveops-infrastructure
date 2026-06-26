@@ -501,3 +501,25 @@ resource "azurerm_role_assignment" "aks_admins_kv_officer" {
   principal_id         = each.value
 }
 
+# Grant AGIC identity Contributor access to the Application Gateway
+resource "azurerm_role_assignment" "agic_appgw_contributor" {
+  scope                = module.appgw.id
+  role_definition_name = "Contributor"
+  principal_id         = module.resolveops_aks.ingress_application_gateway_identity_object_id
+}
+
+# Grant AGIC identity Reader access to the resource group
+resource "azurerm_role_assignment" "agic_rg_reader" {
+  scope                = module.resource_group.id
+  role_definition_name = "Reader"
+  principal_id         = module.resolveops_aks.ingress_application_gateway_identity_object_id
+}
+
+# Grant AGIC identity Network Contributor access to the VNet
+resource "azurerm_role_assignment" "agic_vnet_network_contributor" {
+  scope                = module.networking.vnet_id
+  role_definition_name = "Network Contributor"
+  principal_id         = module.resolveops_aks.ingress_application_gateway_identity_object_id
+}
+
+
