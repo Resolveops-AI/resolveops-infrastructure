@@ -522,4 +522,12 @@ resource "azurerm_role_assignment" "agic_vnet_network_contributor" {
   principal_id         = module.resolveops_aks.ingress_application_gateway_identity_object_id
 }
 
+# Allow AKS Kubelet to pull images from ACR
+resource "azurerm_role_assignment" "aks_acr_pull" {
+  scope                = module.acr.id
+  role_definition_name = "AcrPull"
+  principal_id         = module.resolveops_aks.kubelet_identity_object_id
+}
+
+
 
