@@ -14,7 +14,7 @@ subnets = {
 
 acr_name                     = "resolveopsacr05"
 log_analytics_workspace_name = "resolveops-law"
-key_vault_name               = "sathvik-kv-05"
+key_vault_name               = "sathvik-kv-06"
 storage_account_name         = "resolveopssa05"
 
 resolveops_aks_name  = "resolveops-aks-05"
@@ -26,7 +26,7 @@ argocd_namespace         = "argocd"
 monitoring_namespace     = "monitoring"
 
 # Azure AI Service (ResolveOps AI)
-ai_service_name = "resolveops-ai-05"
+ai_service_name = "resolveops-ai-06"
 ai_sku_name     = "S0"
 ai_location     = "eastus"
 
