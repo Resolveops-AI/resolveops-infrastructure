@@ -258,3 +258,11 @@ EOF
 * **Cause:** The newly created AKS cluster's Kubelet Managed Identity lacked permissions to read/pull images from the Azure Container Registry (ACR).
 * **Resolution:** Added the `AcrPull` role assignment in `main.tf` mapping the AKS Kubelet Identity (`kubelet_identity_object_id`) to the Container Registry (`acr.id`).
 
+### Incident 10: MongoDB Authentication Failure in QuickHaul microservices
+* **Symptom:** Pods run but log `FAILED to connect to MongoDB: Authentication failed` and fail their HTTP readiness/liveness probes, causing a `502 Bad Gateway` at the Application Gateway.
+* **Cause:** MongoDB initializes users defined via `MONGO_INITDB_ROOT_USERNAME` inside the `admin` database. The microservice connection URI targeted `quickhaul_dev` database without specifying the auth database, causing MongoDB to look for the user in the wrong database.
+* **Resolution:** 
+  1. Wiped the old persistent volume claim (`quickhaul-mongodb-data`) to force MongoDB to initialize with the new password.
+  2. Modified the Helm template (`quickhaul/helm/quickhaul/templates/deployment.yaml`) to append `?authSource=admin` to the generated `MONGO_URI` environment variable so that authentication requests are properly directed to the `admin` database.
+
+
